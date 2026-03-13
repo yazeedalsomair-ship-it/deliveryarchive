@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>داشبورد مستودع موصول العلا</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#060b12;--s1:#0b1422;--s2:#0f1c30;--border:rgba(255,255,255,.07);
+  --border2:rgba(255,255,255,.12);--cyan:#0ea5e9;--teal:#0d9488;
+  --green:#16a34a;--yellow:#ca8a04;--red:#dc2626;--orange:#ea580c;
+  --purple:#7c3aed;--text:#e2e8f0;--dim:#475569;--dim2:#94a3b8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0b1e3d,#091628);border-bottom:1px solid rgba(14,165,233,.2);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;backdrop-filter:blur(20px);}
+.hl{display:flex;align-items:center;gap:.75rem;}
+.logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#0d9488);display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 0 16px rgba(14,165,233,.4);}
+.htitle{font-size:1rem;font-weight:700;}
+.htitle small{display:block;font-size:.63rem;color:var(--dim2);font-weight:400;margin-top:1px;}
+.hr{display:flex;align-items:center;gap:.6rem;}
+.live{display:flex;align-items:center;gap:.3rem;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);color:#4ade80;border-radius:20px;padding:.2rem .6rem;font-size:.65rem;font-weight:600;}
+.dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* UPLOAD STRIP */
+.upstrip{background:var(--s1);border-bottom:1px solid var(--border);padding:.55rem 1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.upstrip-label{font-size:.72rem;color:var(--dim2);font-weight:600;display:flex;align-items:center;gap:.35rem;flex-shrink:0;}
+.drop-area{
+  flex:1;min-width:180px;max-width:380px;
+  border:1.5px dashed var(--border2);border-radius:8px;
+  padding:.4rem .9rem;cursor:pointer;transition:all .2s;position:relative;
+  display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.01);
+}
+.drop-area:hover,.drop-area.drag{border-color:var(--cyan);background:rgba(14,165,233,.04);}
+.drop-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.drop-txt{font-size:.72rem;color:var(--dim2);}
+.drop-btn{background:var(--cyan);color:#fff;border:none;border-radius:5px;padding:.28rem .8rem;font-size:.7rem;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.drop-btn:hover{background:#0369a1;}
+.loaded-info{display:none;align-items:center;gap:.5rem;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);border-radius:7px;padding:.3rem .75rem;font-size:.7rem;}
+.loaded-info.show{display:flex;}
+.lf{font-weight:700;color:#4ade80;}
+.xcl{background:none;border:none;color:var(--dim);cursor:pointer;font-size:.8rem;margin-right:auto;}
+.xcl:hover{color:var(--red);}
+.uptime{font-size:.65rem;color:var(--dim);flex-shrink:0;}
+
+/* CHAIN */
+.chain{background:linear-gradient(90deg,#0a1830,#091628);border-bottom:1px solid rgba(14,165,233,.1);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.3rem;font-size:.65rem;overflow-x:auto;white-space:nowrap;}
+.chain::-webkit-scrollbar{height:0;}
+.cn{background:var(--s2);border:1px solid rgba(14,165,233,.2);border-radius:5px;padding:.2rem .6rem;font-weight:600;color:var(--cyan);flex-shrink:0;}
+.cn.me{background:rgba(14,165,233,.1);border-color:var(--cyan);}
+.ca{color:var(--dim);flex-shrink:0;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--s1);padding:0 1.5rem;overflow-x:auto;}
+.tabs::-webkit-scrollbar{height:0;}
+.tab{padding:.58rem .95rem;font-size:.75rem;font-weight:600;color:var(--dim2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s;display:flex;align-items:center;gap:.28rem;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tcnt{background:rgba(14,165,233,.1);color:var(--cyan);border-radius:20px;padding:.06rem .38rem;font-size:.6rem;font-weight:700;}
+.tab.active .tcnt{background:var(--cyan);color:#fff;}
+
+/* CONTENT */
+.content{padding:0 1.5rem 2rem;}
+.sec{display:none;}
+.sec.active{display:block;}
+
+/* KPI */
+.krow{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.7rem;margin:1rem 0;}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:.8rem .9rem;position:relative;overflow:hidden;transition:transform .18s;}
+.kpi:hover{transform:translateY(-2px);}
+.kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc);}
+.kl{font-size:.62rem;color:var(--dim2);font-weight:500;margin-bottom:.28rem;}
+.kv{font-size:1.55rem;font-weight:700;color:var(--kc);line-height:1;}
+.ks{font-size:.6rem;color:var(--dim);margin-top:.22rem;}
+.ki{position:absolute;top:.7rem;left:.75rem;font-size:1.1rem;opacity:.1;}
+
+/* Charts */
+.cg{display:grid;gap:.8rem;margin-bottom:.9rem;}
+.cg2{grid-template-columns:1fr 1fr;}
+@media(max-width:780px){.cg2{grid-template-columns:1fr;}}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:.9rem;}
+.cct{font-size:.7rem;font-weight:700;margin-bottom:.7rem;color:var(--dim2);}
+.cct strong{color:var(--text);}
+.ch{position:relative;}
+.h155{height:155px;}.h185{height:185px;}
+
+/* Alerts */
+.alb{margin-bottom:.9rem;}
+.al{display:flex;align-items:flex-start;gap:.5rem;padding:.5rem .75rem;border-radius:6px;margin-bottom:.3rem;font-size:.72rem;line-height:1.5;}
+.al:last-child{margin-bottom:0;}
+.al-r{background:rgba(220,38,38,.08);border-right:3px solid var(--red);}
+.al-o{background:rgba(234,88,12,.08);border-right:3px solid var(--orange);}
+.al-y{background:rgba(202,138,4,.08);border-right:3px solid var(--yellow);}
+.al-g{background:rgba(22,163,74,.08);border-right:3px solid var(--green);}
+.ai{flex-shrink:0;font-size:.88rem;}
+.al b{font-weight:700;}
+
+/* Src filter buttons */
+.stabs{display:flex;gap:.3rem;margin-bottom:.8rem;flex-wrap:wrap;}
+.stab{background:var(--s2);border:1px solid var(--border2);color:var(--dim2);padding:.25rem .72rem;border-radius:6px;font-family:inherit;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.stab:hover{color:var(--text);}
+.stab.on{background:rgba(14,165,233,.12);color:var(--cyan);border-color:var(--cyan);}
+
+/* Table */
+.tc{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:.9rem;}
+.ttop{padding:.6rem .95rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;}
+.tt{font-size:.75rem;font-weight:700;}
+.sr{background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:.26rem .6rem;font-size:.7rem;font-family:inherit;outline:none;width:160px;}
+.sr:focus{border-color:var(--cyan);}
+.sr::placeholder{color:var(--dim);}
+.ts{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.7rem;}
+thead th{background:var(--s2);padding:.5rem .75rem;text-align:right;color:var(--dim);font-weight:600;font-size:.62rem;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .1s;}
+tbody tr:hover{background:rgba(255,255,255,.02);}
+tbody td{padding:.5rem .75rem;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis;}
+.ndt{text-align:center;padding:2.5rem;color:var(--dim);font-size:.75rem;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:.12rem .48rem;border-radius:20px;font-size:.6rem;font-weight:700;}
+.b-dept{background:rgba(124,58,237,.15);color:#a78bfa;}
+.b-center{background:rgba(13,148,136,.15);color:#2dd4bf;}
+.b-nupco{background:rgba(234,88,12,.15);color:#fb923c;}
+.b-alula{background:rgba(14,165,233,.15);color:var(--cyan);}
+
+/* Numbers */
+.nred{color:#f87171;font-weight:700;}
+.nyel{color:#facc15;font-weight:700;}
+.ngrn{color:#4ade80;font-weight:700;}
+.ncyn{color:var(--cyan);}
+
+/* Pager */
+.pgr{padding:.5rem .95rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.65rem;color:var(--dim);}
+.pgbs{display:flex;gap:.18rem;}
+.pgb{background:var(--s2);border:1px solid var(--border2);color:var(--text);padding:.18rem .48rem;border-radius:4px;cursor:pointer;font-family:inherit;font-size:.62rem;transition:all .1s;}
+.pgb:hover,.pgb.on{background:var(--cyan);color:#fff;border-color:var(--cyan);font-weight:700;}
+
+/* Flow diagram */
+.flow{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-bottom:.9rem;}
+.flt{font-size:.7rem;font-weight:700;color:var(--dim2);margin-bottom:.8rem;}
+.flt strong{color:var(--text);}
+.fld{display:flex;align-items:center;justify-content:center;gap:.35rem;flex-wrap:wrap;}
+.fn{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:.5rem .8rem;text-align:center;min-width:100px;flex-shrink:0;}
+.fn.me{border-color:var(--cyan);background:rgba(14,165,233,.07);}
+.fni{font-size:1.1rem;margin-bottom:.15rem;}
+.fnn{font-size:.65rem;font-weight:700;}
+.fnt{font-size:.56rem;color:var(--dim2);margin-top:.06rem;}
+.fnc{font-size:.6rem;color:var(--cyan);font-weight:700;margin-top:.12rem;}
+.fa{color:var(--dim);font-size:.9rem;flex-shrink:0;}
+
+/* Empty state */
+.empty{text-align:center;padding:3.5rem 1.5rem;color:var(--dim);}
+.empty-ico{font-size:3rem;opacity:.15;margin-bottom:.75rem;}
+.empty p{font-size:.8rem;line-height:1.7;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hl">
+    <div class="logo">🏥</div>
+    <div class="htitle">مستودع موصول العلا — Delivery Archive
+      <small>يتحدث تلقائياً عند رفع ملف Excel جديد</small>
+    </div>
+  </div>
+  <div class="hr">
+    <div class="live"><div class="dot"></div>مباشر</div>
+  </div>
+</div>
+
+<!-- UPLOAD STRIP -->
+<div class="upstrip">
+  <span class="upstrip-label">🔄 تحديث البيانات:</span>
+
+  <div class="drop-area" id="dropArea" ondragover="odg(event,true)" ondragleave="odg(event,false)" ondrop="odr(event)">
+    <input type="file" accept=".xlsx,.xls,.csv" id="fileIn" onchange="onFileChange(event)">
+    <span class="drop-txt">اسحب ملف Excel هنا</span>
+    <button class="drop-btn" onclick="event.stopPropagation();document.getElementById('fileIn').click()">📂 اختر ملف</button>
+  </div>
+
+  <div class="loaded-info" id="loadedInfo">
+    <span>📄 <span class="lf" id="loadedName"></span></span>
+    <span id="loadedCount" style="color:var(--dim2);font-size:.65rem;"></span>
+    <button class="xcl" onclick="resetToSeed()" title="العودة للبيانات الأصلية">↩ إعادة تعيين</button>
+  </div>
+
+  <span class="uptime" id="uptime">البيانات المحملة: delivery_archive.xlsx · 88 سجل</span>
+</div>
+
+<!-- SUPPLY CHAIN -->
+<div class="chain">
+  <span style="color:var(--dim2);font-size:.6rem;">سلسلة الإمداد:</span>
+  <div class="cn">🏙️ NUPCO — المدينة اللوجستي</div>
+  <span class="ca">←</span>
+  <div class="cn me">🏥 موصول العلا (W2D5)</div>
+  <span class="ca">←</span>
+  <div class="cn">🏨 أقسام المستشفى</div>
+  <span class="ca">&</span>
+  <div class="cn">🏢 المراكز الصحية MOH</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="sTab(0,this)">📊 نظرة عامة <span class="tcnt" id="tc0">0</span></div>
+  <div class="tab" onclick="sTab(1,this)">📋 كل الطلبات <span class="tcnt" id="tc1">0</span></div>
+  <div class="tab" onclick="sTab(2,this)">🏨 الأقسام <span class="tcnt" id="tc2">0</span></div>
+  <div class="tab" onclick="sTab(3,this)">🏢 المراكز MOH <span class="tcnt" id="tc3">0</span></div>
+  <div class="tab" onclick="sTab(4,this)">💊 الأصناف <span class="tcnt" id="tc4">0</span></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="sec active" id="s0">
+    <div class="krow" id="k0"></div>
+    <div id="al0"></div>
+    <div class="flow" id="flowDiag">
+      <div class="flt"><strong>🗺️ خريطة تدفق الإمداد</strong></div>
+      <div class="fld">
+        <div class="fn"><div class="fni">🏙️</div><div class="fnn">NUPCO</div><div class="fnt">المدينة اللوجستي</div><div class="fnc" id="fd1">—</div></div>
+        <span class="fa">←</span>
+        <div class="fn me"><div class="fni">🏥</div><div class="fnn">موصول العلا</div><div class="fnt">مستودعنا (W2D5)</div><div class="fnc" id="fd2">—</div></div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;">
+          <div style="display:flex;align-items:center;gap:.3rem;">
+            <span class="fa">←</span>
+            <div class="fn"><div class="fni">🏨</div><div class="fnn">أقسام المستشفى</div><div class="fnt">طلبات داخلية</div><div class="fnc" id="fd3">—</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.3rem;">
+            <span class="fa">←</span>
+            <div class="fn"><div class="fni">🏢</div><div class="fnn">المراكز الصحية</div><div class="fnt">MOH — خارجية</div><div class="fnc" id="fd4">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cg cg2" id="cg0"></div>
+  </div>
+
+  <div class="sec" id="s1">
+    <div class="krow" id="k1"></div>
+    <div id="al1"></div>
+    <div class="stabs" id="st1">
+      <button class="stab on" onclick="setSrc(1,'all',this)">📋 الكل</button>
+      <button class="stab" onclick="setSrc(1,'AlUla',this)">🏥 موصول العلا</button>
+      <button class="stab" onclick="setSrc(1,'NUPCO',this)">🏙️ NUPCO</button>
+    </div>
+    <div class="cg cg2" id="cg1"></div>
+    <div class="tc" id="t1"></div>
+  </div>
+
+  <div class="sec" id="s2">
+    <div class="krow" id="k2"></div>
+    <div class="cg cg2" id="cg2"></div>
+    <div class="tc" id="t2"></div>
+  </div>
+
+  <div class="sec" id="s3">
+    <div class="krow" id="k3"></div>
+    <div class="cg cg2" id="cg3"></div>
+    <div class="tc" id="t3"></div>
+  </div>
+
+  <div class="sec" id="s4">
+    <div class="krow" id="k4"></div>
+    <div id="al4"></div>
+    <div class="cg cg2" id="cg4"></div>
+    <div class="tc" id="t4"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   SEED DATA (delivery_archive.xlsx)
+══════════════════════════════ */
+const SEED = [{"file": "telegram_20260228_022549.jpg", "order": "004-832-188", "shipment": "SID7242458", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VITAMIN B1+B6+B12 TABLET", "family": "TBCAP", "qty": 750, "expiry": "31/03/2027", "truck": "", "pallets": ""}, {"file": "telegram_20260228_023140.jpg", "order": "004-832-188", "shipment": "SID7242458", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VITAMIN B1+B6+B12 TABLET", "family": "TBCAP", "qty": 750, "expiry": "31/03/2027", "truck": "", "pallets": ""}, {"file": "telegram_20260228_023153.jpg", "order": "004-829-597", "shipment": "SID7237921", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "male Surgery ward", "destType": "dept", "city": "Maddinah", "item": "SYRINGE 10ML LUER WITH NEEDLE G21X1.5IN", "family": "HOSPC", "qty": 250, "expiry": "11/02/2030", "truck": "", "pallets": ""}, {"file": "telegram_20260228_023205.jpg", "order": "004-832-117", "shipment": "SID7241038", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Nursery", "destType": "dept", "city": "Maddinah", "item": "REAGENT BLOOD GAS ABL800", "family": "BI-CH", "qty": 200, "expiry": "31/12/2026", "truck": "", "pallets": ""}, {"file": "2_11_26__8_004-829-597.jpg", "order": "004-829-597", "shipment": "SID7237921", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "male Surgery ward", "destType": "dept", "city": "Maddinah", "item": "SYRINGE 10ML LUER WITH NEEDLE G21X1.5IN", "family": "HOSPC", "qty": 200, "expiry": "11/02/2030", "truck": "", "pallets": ""}, {"file": "2_11_26__8_004-832-117.jpg", "order": "004-832-117", "shipment": "SID7241038", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Nursery", "destType": "dept", "city": "Maddinah", "item": "REAGENT BLOOD GAS ABL800", "family": "BI-CH", "qty": 200, "expiry": "31/12/2026", "truck": "", "pallets": ""}, {"file": "2_11_26__8_004-832-188.jpg", "order": "004-832-188", "shipment": "SID7242458", "createDate": "10/02/2026", "procDate": "2026-02-28", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VITAMIN B1+B6+B12 TABLET", "family": "TBCAP", "qty": 750, "expiry": "31/03/2027", "truck": "", "pallets": ""}, {"file": "26_02_2026_7000145442.jpg", "order": "7000145442", "shipment": "SID7437032", "createDate": "17/02/2026", "procDate": "2026-03-01", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH D2D - Prince abd almohsen Hospi", "destType": "center", "city": "Jeddah", "item": "REA IMMUNO DIACLON ABD 001135-DIAMED 789040036", "family": "Laboratory Supplies", "qty": 0, "expiry": "30/09/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "3_2_26__9__004-901-648.jpg", "order": "004-901-648", "shipment": "SID7521942", "createDate": "01/03/2026", "procDate": "2026-03-02", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Al-Ula Airport Health Center", "destType": "center", "city": "AlUla", "item": "DEXTROSE 50% INJ 50ML AMP", "family": "SOLU", "qty": 6, "expiry": "16/02/2028", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-321-518.jpg", "order": "093-321-518", "shipment": "SID7479492", "createDate": "25/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "COTTON 8705109 ΝΑΤΙΟNAL MEDICAL", "family": "Medical Supplies", "qty": 0, "expiry": "31/10/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-321-456.jpg", "order": "093-321-456", "shipment": "SID7479491", "createDate": "25/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "VISPAQUE 320MG/50ML GE HEALTH CARE", "family": "Pharmaceuticals", "qty": 0, "expiry": "01/05/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-321-534.jpg", "order": "093-321-534", "shipment": "SID7479511", "createDate": "25/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "TAPE ZINC OX 75CMX9M BL0577 ZHEJIANG", "family": "General", "qty": 0, "expiry": "10/06/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-383-648.jpg", "order": "093-383-648", "shipment": "SID7501323", "createDate": "26/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "LEVOBAT 500 MG TABLET BATTERJEE", "family": "General", "qty": 0, "expiry": "22/10/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_092-931-367.jpg", "order": "092-931-367", "shipment": "SID7464810", "createDate": "24/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Al-Mansheya Health Center", "destType": "center", "city": "ALUla 04 43521 SAU", "item": "DAM SAFE FACE MASK 874421/9 ΝΑΤΙΟNAL", "family": "Medical Supplies", "qty": 0, "expiry": "30/12/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-299-439.jpg", "order": "093-299-439", "shipment": "SID7482830", "createDate": "25/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - AINujail PHC", "destType": "center", "city": "AlUla 04", "item": "NEBULIZER KIT PEDIA MS-22886", "family": "General", "qty": 0, "expiry": "14/11/2029 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-315-804.jpg", "order": "093-315-804", "shipment": "SID7478651", "createDate": "25/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "BAG URNRY 100200ML FUB2000500FC", "family": "General", "qty": 0, "expiry": "01/07/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "28_02_2026_093-383-652.jpg", "order": "093-383-652", "shipment": "SID7501325", "createDate": "26/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "ELTROXIN 01MG TAB ASPEN BAD", "family": "Pharmaceuticals", "qty": 0, "expiry": "31/10/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "3_1_26__1__004-901-729.jpg", "order": "004-901-729", "shipment": "SID7514214", "createDate": "01/03/2026", "procDate": "2026-03-03", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "AKU", "destType": "dept", "city": "Maddinah", "item": "LOCK SOLN5ML CYCLOTAURO 500U HEPA", "family": "KIDNEY", "qty": 100, "expiry": "28/02/2028", "truck": "9331HRA", "pallets": "1"}, {"file": "27_02_2026_093-257-139.jpg", "order": "093-257-139", "shipment": "SID7463729", "createDate": "24/02/2026", "procDate": "2026-03-03", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Madain Saleh PHC", "destType": "center", "city": "AlUla 04", "item": "GLYCOHMOGLOBIN HBA1C TEST 1116795", "family": "General", "qty": 0, "expiry": "23/06/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-017-162.jpg", "order": "093-017-162", "shipment": "SID7464790", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-alsukhayrat Health Center", "destType": "center", "city": "ALUla 04 43561 SAU", "item": "LIPID PANEL POCT AFINION D1116801", "family": "General", "qty": 0, "expiry": "15/08/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-257-190.jpg", "order": "093-257-190", "shipment": "SID7464742", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Al-Mansheya Health Center", "destType": "center", "city": "ALUla", "item": "LIPID PANEL POCT AFINION D1116801", "family": "General", "qty": 0, "expiry": "15/08/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-199-059.jpg", "order": "093-199-059", "shipment": "SID7463422", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Deira Health Center Lab", "destType": "center", "city": "Madinah 04 SAU", "item": "RAPID URINE STRIP S0254 SIMAT", "family": "General", "qty": 0, "expiry": "01/01/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-257-286.jpg", "order": "093-257-286", "shipment": "SID7464792", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Al-Mansheya Health Center", "destType": "center", "city": "ALUla 04 43521 SAU", "item": "GLYCOHMOGLOBIN HBA1C TEST 1116795", "family": "General", "qty": 0, "expiry": "23/06/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "25_02_2026_093-051-034.jpg", "order": "093-051-034", "shipment": "SID7414053", "createDate": "19/02/2026", "procDate": "2026-03-04", "user": "MMASOODD", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Deira Health Center Lab", "destType": "center", "city": "Madinah 04 SAU", "item": "LIPID PANEL POCT AFINION D1116801", "family": "General", "qty": 0, "expiry": "15/08/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-194-886.jpg", "order": "093-194-886", "shipment": "SID7464795", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-alsukhayrat Health Center", "destType": "center", "city": "ALUla 04 43561 SAU", "item": "PULMICORT NEB RESPULE 500MCG", "family": "Pharmaceuticals", "qty": 0, "expiry": "30/04/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-264-603.jpg", "order": "093-264-603", "shipment": "SID7482713", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Deira Health Center Lab", "destType": "center", "city": "Madinah 04 SAU", "item": "LIQ CONCENTRATED NON PROTEIN 8093", "family": "General", "qty": 0, "expiry": "01/11/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-199-043.jpg", "order": "093-199-043", "shipment": "SID7464741", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Al-Atheeb Health Center", "destType": "center", "city": "", "item": "CHEM INDICATOR TYPE 6 15100664 FAMOS", "family": "General", "qty": 0, "expiry": "30/04/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-051-958.jpg", "order": "093-051-958", "shipment": "SID7464791", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Al-Atheeb Health Center", "destType": "center", "city": "ALUla", "item": "LIPID PANEL POCT AFINION D1116801", "family": "General", "qty": 0, "expiry": "15/08/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-199-668.jpg", "order": "093-199-668", "shipment": "SID7463731", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "MMASOODD", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Al-Atheeb Health Center", "destType": "center", "city": "ALUla 04 43538 SAU", "item": "REMOX 500MG CAP JPI", "family": "Pharmaceuticals", "qty": 0, "expiry": "01/06/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-199-668.jpg", "order": "093-199-668", "shipment": "SID7463731", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "MMASOODD", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Al-Atheeb Health Center", "destType": "center", "city": "ALUla 04 43538 SAU", "item": "DIAMICRON MR 30MG TAB SERVIER", "family": "Pharmaceuticals", "qty": 0, "expiry": "01/11/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-194-983.jpg", "order": "093-194-983", "shipment": "SID7460028", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "", "destType": "dept", "city": "Maddinah", "item": "FIX TUBULAR 871615/1 NATIONAL MEDICAL", "family": "Medical Supplies", "qty": 0, "expiry": "30/04/2029 12:00:00", "truck": "", "pallets": ""}, {"file": "24_02_2026_092-936-692.jpg", "order": "092-936-692", "shipment": "SID7369606", "createDate": "17/02/2026", "procDate": "2026-03-04", "user": "MMASOODD", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Maghera Health Center", "destType": "center", "city": "ALUla 04 43312 SAU", "item": "BCG VACCINE INJ AJVACCINE", "family": "Pharmaceuticals", "qty": 0, "expiry": "30/11/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "24_02_2026_092-936-692.jpg", "order": "092-936-692", "shipment": "SID7369606", "createDate": "17/02/2026", "procDate": "2026-03-04", "user": "MMASOODD", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Maghera Health Center", "destType": "center", "city": "ALUla", "item": "HAVRIX 720 GLAXO SMITH KLINE", "family": "Pharmaceuticals", "qty": 0, "expiry": "30/09/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-195-119.jpg", "order": "093-195-119", "shipment": "SID7460066", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "SWAB AMIES TRANSPRT MEDIA MDM 550", "family": "Laboratory Supplies", "qty": 0, "expiry": "31/10/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-194-671.jpg", "order": "093-194-671", "shipment": "SID7460013", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "TRANSP DRESSING 2177309 NATIONAL MED 128230211", "family": "Medical Supplies", "qty": 0, "expiry": "30/11/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "26_02_2026_093-197-471.jpg", "order": "093-197-471", "shipment": "SID7463243", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "ATEMPERO VEGENAT HEALTHCARE", "family": "General", "qty": 0, "expiry": "17/01/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-260-582.jpg", "order": "093-260-582", "shipment": "SID7463276", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "GOWN BLUE XL W2 TOWEL 2303456", "family": "General", "qty": 0, "expiry": "30/06/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "3_2_26__9__004-893-457.jpg", "order": "004-893-457", "shipment": "SID7526116", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Intensive Care Unit", "destType": "dept", "city": "Maddinah", "item": "GLOVES LATEX NON POWDERED S 6 6.5", "family": "HOSPC", "qty": 1500, "expiry": "31/12/2028", "truck": "9331HRA", "pallets": "1"}, {"file": "27_02_2026_093-017-162.jpg", "order": "093-017-162", "shipment": "SID7464790", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH -alsukhayrat Health Center", "destType": "center", "city": "ALUla", "item": "LIPID PANEL POCT AFINION D1116801", "family": "General", "qty": 0, "expiry": "15/08/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "3_2_26__12_004-905-945.jpg", "order": "004-905-945", "shipment": "SID7530983", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Respiratory", "destType": "dept", "city": "Maddinah", "item": "REAGENT IMMUNOLOGY DIACLON ABD", "family": "BLOOD", "qty": 144, "expiry": "30/09/2026", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__10_004-903-025.jpg", "order": "004-903-025", "shipment": "SID7521938", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Nursery", "destType": "dept", "city": "Maddinah", "item": "SET SUCTION YANKAUER CROWN TIP 180-", "family": "HOSPC", "qty": 20, "expiry": "01/12/2030", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__9__004-903-028.jpg", "order": "004-903-028", "shipment": "SID7521939", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AIUla Hospital D2D", "srcType": "AlUla", "consignee": "male Internal Med", "destType": "dept", "city": "Maddinah", "item": "SET SUCTION YANKAUER CROWN TIP 180-", "family": "HOSPC", "qty": 12, "expiry": "01/12/2030", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__12_004-907-309.jpg", "order": "004-907-309", "shipment": "SID7536261", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Emergency Department", "destType": "dept", "city": "Maddinah", "item": "CARTRIDGE CG4+ POCT ISTAT", "family": "BI-CH", "qty": 100, "expiry": "14/06/2026", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__12_004-906-879.jpg", "order": "004-906-879", "shipment": "SID7533873", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "male Surgery ward", "destType": "dept", "city": "Maddinah", "item": "CANNULA INTRAVENOUS TEFLON WINGS G 20", "family": "HOSPD", "qty": 200, "expiry": "01/05/2030", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__12_004-906-889.jpg", "order": "004-906-889", "shipment": "SID7533874", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AIUla Hospital D2D", "srcType": "AlUla", "consignee": "male Surgery ward", "destType": "dept", "city": "Maddinah", "item": "SET SUCTION YANKAUER CROWN TIP 180-", "family": "HOSPC", "qty": 10, "expiry": "01/12/2030", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__9__004-901-601.jpg", "order": "004-901-601", "shipment": "SID7521944", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "CO AMOXICLAV 875MG 125 MG TABLET", "family": "ANTBI", "qty": 1974, "expiry": "01/06/2026", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__12_004-907-459.jpg", "order": "004-907-459", "shipment": "SID7539537", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "SODIUM CHLORIDE 3% 10 ML", "family": "AMP", "qty": 30, "expiry": "31/03/2028", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-901-430.jpg", "order": "004-901-430", "shipment": "SID7521937", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AIUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VITAMIN D3 CHOLCALCIFEROL 1000 IU CAPSUL", "family": "ТВСАР", "qty": 360, "expiry": "30/10/2028", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-901-430.jpg", "order": "004-901-430", "shipment": "SID7521937", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VITAMIN D3 CHOLECALCIFEROL 10000 IU CAPS", "family": "TBCAP", "qty": 900, "expiry": "31/01/2028", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-903-038.jpg", "order": "004-903-038", "shipment": "SID7521946", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "VALPROATE SODIUM 500 MG TABLET MR", "family": "TBCAP", "qty": 900, "expiry": "30/06/2027", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-902-990.jpg", "order": "004-902-990", "shipment": "SID7521945", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "METFORMIN HCL 750 MG TAB MR", "family": "TBCAP", "qty": 5860, "expiry": "02/02/2027", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__10_004-902-998.jpg", "order": "004-902-998", "shipment": "SID7530551", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Clinics", "destType": "dept", "city": "Maddinah", "item": "SWAB IMPREGNATED 70% IA. SI:4X4CM", "family": "HOSPB", "qty": 1500, "expiry": "10/11/2027", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__10_004-902-998.jpg", "order": "004-902-998", "shipment": "SID7530551", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "", "srcType": "AlUla", "consignee": "Clinics", "destType": "dept", "city": "Maddinah", "item": "WOODEN TONGUE DEPRESSOR INDV. WRAP", "family": "HOSPD", "qty": 300, "expiry": "30/09/2030", "truck": "9326HRA", "pallets": "1"}, {"file": "3_2_26__9__004-903-038.jpg", "order": "004-903-038", "shipment": "SID7521946", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "FUSIDIC ACID 2% OINTMENT", "family": "ANTBI", "qty": 250, "expiry": "28/02/2027", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-903-029.jpg", "order": "004-903-029", "shipment": "SID7520037", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Operations", "destType": "dept", "city": "Maddinah", "item": "SET SUCTION YANKAUER CROWN TIP 180-", "family": "HOSPC", "qty": 34, "expiry": "01/12/2030", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__1__004-907-947.jpg", "order": "004-907-947", "shipment": "SID7541336", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "", "destType": "dept", "city": "Maddinah", "item": "ALKALINE DETERGENT SOD/POTASS", "family": "HOSPB", "qty": 8, "expiry": "01/05/2026", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-903-030.jpg", "order": "004-903-030", "shipment": "SID7520036", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUia Hospital D2D", "srcType": "AlUla", "consignee": "OB&GYN", "destType": "dept", "city": "Maddinah", "item": "SET SUCTION YANKAUER CROWN TIP 180-", "family": "HOSPC", "qty": 45, "expiry": "01/12/2030", "truck": "9331HRA", "pallets": "1"}, {"file": "3_2_26__9__004-901-648.jpg", "order": "004-901-648", "shipment": "SID7521942", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Al-Ula Airport Health Center", "destType": "center", "city": "AlUla", "item": "DEXTROSE 50% INJ 50ML AMP", "family": "SOLU", "qty": 6, "expiry": "16/02/2028", "truck": "9331HRA", "pallets": ""}, {"file": "3_3_26__9__004-904-867.jpg", "order": "004-904-867", "shipment": "SID7530984", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Shaar clinic", "destType": "dept", "city": "Maddinah", "item": "CARTRIDGE CG4+ POCT ISTAT", "family": "BI-CH", "qty": 120, "expiry": "14/06/2026", "truck": "9326HRA", "pallets": "2"}, {"file": "3_3_26__1__004-903-008.jpg", "order": "004-903-008", "shipment": "SID7562617", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Emergency Department", "destType": "dept", "city": "Maddinah", "item": "SWAB IMPREGNATED 70% IA. SI:4X4CM", "family": "HOSPB", "qty": 10000, "expiry": "10/11/2027", "truck": "9331HRA", "pallets": "2"}, {"file": "3_3_26__1__004-903-008.jpg", "order": "004-903-008", "shipment": "SID7562617", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Emergency Department", "destType": "dept", "city": "Maddinah", "item": "SYRINGE INSULIN 1ML SZ G30X12.7MM", "family": "HOSPC", "qty": 200, "expiry": "27/03/2028", "truck": "9331HRA", "pallets": "2"}, {"file": "3_3_26__1__004-903-008.jpg", "order": "004-903-008", "shipment": "SID7562617", "createDate": "01/03/2026", "procDate": "2026-03-04", "user": "BJARGA", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Emergency Department", "destType": "dept", "city": "Maddinah", "item": "SYRINGE 1ML LUER SLIP W/26 GA NEEDLE", "family": "HOSPC", "qty": 500, "expiry": "30/03/2028", "truck": "9331HRA", "pallets": "2"}, {"file": "3_3_26__9__004-907-703.jpg", "order": "004-907-703", "shipment": "SID7539538", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Intensive Care Unit", "destType": "dept", "city": "Maddinah", "item": "SUTURE SILK 2/0 25-26 1/2 TAP 70-75 BL2", "family": "HOSPC", "qty": 12, "expiry": "30/03/2029", "truck": "9326HRA", "pallets": "2"}, {"file": "3_3_26__9__004-907-703.jpg", "order": "004-907-703", "shipment": "SID7539538", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Intensive Care Unit", "destType": "dept", "city": "Maddinah", "item": "CARTRIDGE CG4+ POCT ISTAT", "family": "BI-CH", "qty": 200, "expiry": "14/06/2026", "truck": "9326HRA", "pallets": "2"}, {"file": "3_3_26__9__004-906-863.jpg", "order": "004-906-863", "shipment": "SID7533871", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "male Surgery ward", "destType": "dept", "city": "Maddinah", "item": "SODIUM CHLORIDE 0.9% INJ 500ML BOTTLE", "family": "SOLU", "qty": 20, "expiry": "19/11/2029", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-907-613.jpg", "order": "004-907-613", "shipment": "SID7539536", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AIUla Hospital D2D", "srcType": "AlUla", "consignee": "AKU", "destType": "dept", "city": "Maddinah", "item": "DIALYZER HIGH FLUX HOLLOW FIBR 1.3 1.4M2", "family": "KIDNEY", "qty": 100, "expiry": "04/07/2027", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-906-851.jpg", "order": "004-906-851", "shipment": "SID7533872", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Nursery", "destType": "dept", "city": "Maddinah", "item": "CARTRIDGE CHEM8 POCT ISTAT", "family": "BI-CH", "qty": 178, "expiry": "14/04/2026", "truck": "9326HRA", "pallets": "2"}, {"file": "3_3_26__9__004-907-714.jpg", "order": "004-907-714", "shipment": "SID7540216", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Laboratory", "destType": "dept", "city": "Maddinah", "item": "REAGENT IMMUNOLOGY DIACLON ABD", "family": "BLOOD", "qty": 56, "expiry": "30/09/2026", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-907-639.jpg", "order": "004-907-639", "shipment": "SID7539541", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "WHITE SOFT PARAFFIN 30-250 G", "family": "RD-CH", "qty": 5500, "expiry": "20/07/2029", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-907-613.jpg", "order": "004-907-613", "shipment": "SID7539536", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "AKU", "destType": "dept", "city": "Maddinah", "item": "CAP INJECTION SEALING W/ MALE LUER 2CM", "family": "KIDNEY", "qty": 350, "expiry": "01/12/2029", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-907-682.jpg", "order": "004-907-682", "shipment": "SID7539540", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Emergency Department", "destType": "dept", "city": "Maddinah", "item": "GLOVES LATEX NON POWDERED L 8 8.5", "family": "HOSPC", "qty": 1000, "expiry": "06/02/2027", "truck": "9326HRA", "pallets": "1"}, {"file": "3_3_26__9__004-907-639.jpg", "order": "004-907-639", "shipment": "SID7539541", "createDate": "02/03/2026", "procDate": "2026-03-04", "user": "ALJEHANI", "sender": "W2D5, AlUla Hospital D2D", "srcType": "AlUla", "consignee": "Pharmacy", "destType": "dept", "city": "Maddinah", "item": "OMEPRAZOLE 40 MG POWDER FOR INJECTION", "family": "AMP", "qty": 200, "expiry": "31/05/2028", "truck": "9326HRA", "pallets": "1"}, {"file": "01_03_2026_093-323-792.jpg", "order": "093-323-792", "shipment": "SID7501319", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "SYRINGE INSULIN G31X6MM YS05031", "family": "Medical Supplies", "qty": 0, "expiry": "30/11/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "02_03_2026_093-384-206.jpg", "order": "093-384-206", "shipment": "SID7501326", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "ADILBASHA", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "DIAPER FROM 3 45KG 25106 UNICHARM", "family": "General", "qty": 0, "expiry": "31/12/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-321-517.jpg", "order": "093-321-517", "shipment": "SID7501315", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "LANCET PHLBTMY PED WELL228-1,5R", "family": "General", "qty": 0, "expiry": "09/04/2029 12:00:00", "truck": "", "pallets": ""}, {"file": "02_03_2026_093-383-503.jpg", "order": "093-383-503", "shipment": "SID7501322", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "ADILBASHA", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "EMBRACE PF SOD CHLORIDE 0.9% 3ML", "family": "General", "qty": 0, "expiry": "11/06/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-321-519.jpg", "order": "093-321-519", "shipment": "SID7479493", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "SOD CHLOR 09 100150ML PF BAG PSI", "family": "Pharmaceuticals", "qty": 0, "expiry": "13/01/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-321-455.jpg", "order": "093-321-455", "shipment": "SID7479484", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "PLAST TRANSP 876068/2 NATIONAL", "family": "Medical Supplies", "qty": 0, "expiry": "31/05/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-323-632.jpg", "order": "093-323-632", "shipment": "SID7501318", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "SENSOR SPO2 PROBE 4045 MASIMO", "family": "Medical Supplies", "qty": 0, "expiry": "01/09/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-323-631.jpg", "order": "093-323-631", "shipment": "SID7501317", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "SENSOR SPO2 PROBE NEWBORN 4003", "family": "General", "qty": 0, "expiry": "01/10/2028 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-323-625.jpg", "order": "093-323-625", "shipment": "SID7501316", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH- Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "NEBULZR KIT SML VOL 35L12C SMD", "family": "General", "qty": 0, "expiry": "14/11/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-194-874.jpg", "order": "093-194-874", "shipment": "SID7464811", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-alsukhayrat Health Center", "destType": "center", "city": "ALUla", "item": "RAMY F30502115220 ALSHIFA MEDICAL", "family": "Medical Supplies", "qty": 0, "expiry": "01/01/2030 12:00:00", "truck": "", "pallets": ""}, {"file": "27_02_2026_093-194-874.jpg", "order": "093-194-874", "shipment": "SID7464811", "createDate": "24/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-alsukhayrat Health Center", "destType": "center", "city": "ALUla", "item": "RAMY SYR 3ML G21X1.5 F3030211522", "family": "General", "qty": 0, "expiry": "01/06/2029 12:00:00", "truck": "", "pallets": ""}, {"file": "02_03_2026_093-383-502.jpg", "order": "093-383-502", "shipment": "SID7501321", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "ADILBASHA", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH-Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "COUCH COVER PAPER ROLL NATIONAL", "family": "Medical Supplies", "qty": 0, "expiry": "28/02/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-320-584.jpg", "order": "093-320-584", "shipment": "SID7482811", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Al-Atheeb Health Center", "destType": "center", "city": "ALUla", "item": "CREPE BANDAGE JC040054 SHANGHAI JOY", "family": "General", "qty": 0, "expiry": "28/02/2030 12:00:00", "truck": "7714", "pallets": ""}, {"file": "01_03_2026_093-325-803.jpg", "order": "093-325-803", "shipment": "SID7501699", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - University and Raziqia PHC", "destType": "center", "city": "AlUla 04", "item": "TUBE BLD COLLECTN VPRO50031 ADVANCE", "family": "Laboratory Supplies", "qty": 0, "expiry": "31/12/2027 12:00:00", "truck": "", "pallets": ""}, {"file": "02_03_2026_093-383-649.jpg", "order": "093-383-649", "shipment": "SID7501324", "createDate": "26/02/2026", "procDate": "2026-03-04", "user": "ADILBASHA", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Prince abd almohsen Hospital", "destType": "center", "city": "Maddinah", "item": "METOLINA 50 AUROBINDO PHARMA", "family": "Pharmaceuticals", "qty": 0, "expiry": "31/07/2026 12:00:00", "truck": "", "pallets": ""}, {"file": "01_03_2026_093-321-000.jpg", "order": "093-321-000", "shipment": "SID7482812", "createDate": "25/02/2026", "procDate": "2026-03-04", "user": "IFTIKHARALI", "sender": "M100, NUPCO Madinah Logistic center", "srcType": "NUPCO", "consignee": "MOH - Al-Atheeb Health Center", "destType": "center", "city": "ALUla", "item": "COUCH COVER PAPER ROLL NATIONAL", "family": "Medical Supplies", "qty": 0, "expiry": "28/02/2027 12:00:00", "truck": "", "pallets": ""}]
+;
+
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+let ALL = [...SEED];
+let CHARTS = {};
+let PAGES = [1,1,1,1,1];
+let SEARCH = ['','','','',''];
+let SRC = ['all','all','all','all','all'];
+let TODAY = new Date();
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = 'IBM Plex Sans Arabic';
+const GR = {color:'rgba(255,255,255,.035)'};
+const SC = {x:{grid:GR},y:{grid:GR,beginAtZero:true}};
+
+/* ══════════════════════════════
+   FILE HANDLING
+══════════════════════════════ */
+function odg(e,o){e.preventDefault();document.getElementById('dropArea').classList.toggle('drag',o);}
+function odr(e){e.preventDefault();document.getElementById('dropArea').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)loadXL(f);}
+function onFileChange(e){const f=e.target.files[0];if(f)loadXL(f);}
+
+function loadXL(file){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      if(!raw.length){alert('الملف فارغ');return;}
+
+      const headers = raw[0].map(h=>String(h).trim());
+      const rows = raw.slice(1).filter(r=>r.some(c=>c!==''));
+
+      ALL = parseRows(headers, rows);
+      document.getElementById('loadedName').textContent = file.name;
+      document.getElementById('loadedCount').textContent = '· '+ALL.length+' سجل';
+      document.getElementById('loadedInfo').classList.add('show');
+      document.getElementById('uptime').textContent = 'آخر تحديث: '+new Date().toLocaleTimeString('ar')+' · '+file.name;
+
+      PAGES=[1,1,1,1,1];SEARCH=['','','','',''];
+      renderAll();
+    }catch(err){alert('خطأ في قراءة الملف: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function resetToSeed(){
+  ALL=[...SEED];
+  document.getElementById('loadedInfo').classList.remove('show');
+  document.getElementById('fileIn').value='';
+  document.getElementById('uptime').textContent='البيانات المحملة: delivery_archive.xlsx · '+SEED.length+' سجل';
+  PAGES=[1,1,1,1,1];SEARCH=['','','','',''];
+  renderAll();
+}
+
+/* ══════════════════════════════
+   PARSE NEW EXCEL
+   يتعرف تلقائياً على أعمدة
+   بنفس هيكل delivery_archive.xlsx
+══════════════════════════════ */
+function first(v){
+  if(v===null||v===undefined)return'';
+  const s=String(v).trim();
+  return s.includes('
+')?s.split('
+')[0].trim():s;
+}
+function sumLines(v){
+  if(!v)return 0;
+  return String(v).split('
+').reduce((s,x)=>{const n=parseInt(x.trim());return s+(isNaN(n)?0:n);},0);
+}
+
+// Auto-detect column indices from header names
+const COL_PATTERNS = {
+  file:     ['file name','file','filename'],
+  order:    ['order number','order no','order','طلب','رقم الطلب','po'],
+  shipment: ['shipment number','shipment','sid','شحنة'],
+  createDate:['order create','create date','تاريخ'],
+  procDate: ['processed date','proc date','processed','معالجة'],
+  user:     ['dispatched user','user','مستخدم','username'],
+  sender:   ['sender','مرسل','from'],
+  consignee:['consignee','جهة','قسم','مركز','to'],
+  pharmCode:['pharmacy code','pharm','code'],
+  city:     ['city','مدينة'],
+  item:     ['description','item','desc','صنف','اسم'],
+  family:   ['item family','family','تصنيف','فئة'],
+  qty:      ['quantity','qty','كمية'],
+  expiry:   ['expiry date','expiry','exp','صلاحية'],
+  truck:    ['truck','شاحنة'],
+  pallets:  ['pallets','طبلية'],
+};
+
+function detectCols(headers){
+  const lh = headers.map(h=>h.toLowerCase());
+  const map = {};
+  for(const [field, pats] of Object.entries(COL_PATTERNS)){
+    for(let i=0;i<lh.length;i++){
+      if(pats.some(p=>lh[i].includes(p))){map[field]=i;break;}
+    }
+  }
+  return map;
+}
+
+function parseSrcType(sender){
+  const s=String(sender).toUpperCase();
+  if(s.includes('NUPCO')||s.includes('LOGISTIC')||s.includes('M100'))return'NUPCO';
+  return'AlUla';
+}
+function parseDestType(consignee){
+  const c=String(consignee).toUpperCase();
+  if(c.includes('MOH')||c.includes('HEALTH CENTER')||c.includes('PHC')||(c.includes('HOSPITAL')&&!c.includes('ALULA')&&!c.includes('D2D')))return'center';
+  return'dept';
+}
+function cleanConsignee(v){
+  if(!v)return'';
+  return String(v).split('
+')[0].replace(/Z00005/g,'').replace(/ALUla 04 \d+ SAU/g,'').replace(/^\d+\s*/,'').trim();
+}
+
+function parseRows(headers, rows){
+  const cm = detectCols(headers);
+  return rows.map(row=>{
+    const g = i => (i!==undefined && row[i]!==undefined) ? row[i] : '';
+    const sender = first(g(cm.sender));
+    const consigRaw = cleanConsignee(g(cm.consignee));
+    const srcType = parseSrcType(sender);
+    const destType = parseDestType(consigRaw);
+    const expRaw = first(g(cm.expiry));
+    return {
+      file:       first(g(cm.file)),
+      order:      first(g(cm.order)) || first(g(0)),
+      shipment:   first(g(cm.shipment)),
+      createDate: first(g(cm.createDate)),
+      procDate:   first(g(cm.procDate)),
+      user:       first(g(cm.user)),
+      sender,
+      srcType,
+      consignee:  consigRaw,
+      destType,
+      city:       first(g(cm.city)),
+      item:       first(g(cm.item)),
+      family:     first(g(cm.family)),
+      qty:        sumLines(g(cm.qty)),
+      expiry:     expRaw,
+      truck:      first(g(cm.truck)),
+      pallets:    first(g(cm.pallets)),
+    };
+  }).filter(r=>r.order);
+}
+
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
+const fn = n => (+n||0).toLocaleString('ar-SA');
+const pct = (a,b) => b?Math.round(a/b*100)+'%':'0%';
+
+function kpi(c,ic,l,v,s){
+  return`<div class="kpi" style="--kc:${c}"><div class="ki">${ic}</div><div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s}</div></div>`;
+}
+function cc(t,id,h='h155'){
+  return`<div class="cc"><div class="cct"><strong>${t}</strong></div><div class="ch ${h}"><canvas id="${id}"></canvas></div></div>`;
+}
+function cx(id){return document.getElementById(id)?.getContext('2d');}
+function dc(id){if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}}
+
+function donut(id,labels,data,colors){
+  const c=cx(id);if(!c)return;dc(id);
+  CHARTS[id]=new Chart(c,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:9,usePointStyle:true,font:{size:9}}}}}});
+}
+function barV(id,labels,data,color='#0ea5e9'){
+  const c=cx(id);if(!c)return;dc(id);
+  CHARTS[id]=new Chart(c,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'77',borderColor:color,borderWidth:1,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:SC}});
+}
+function barH(id,entries,cf){
+  const c=cx(id);if(!c)return;dc(id);
+  CHARTS[id]=new Chart(c,{type:'bar',
+    data:{labels:entries.map(e=>e[0]),datasets:[{data:entries.map(e=>e[1]),
+      backgroundColor:entries.map((_,i)=>cf?cf(i):`hsl(${195+i*18},62%,52%)`),borderWidth:0,borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:GR,beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:9}}}}}});
+}
+
+function alertBox(arr){
+  if(!arr.length)return'';
+  return`<div class="cc alb">${arr.map(a=>`<div class="al ${a.c}"><span class="ai">${a.i}</span><span>${a.t}</span></div>`).join('')}</div>`;
+}
+
+function expiryDays(exp){
+  if(!exp)return 9999;
+  try{
+    const parts=String(exp).split(' ')[0];
+    let d;
+    if(parts.includes('/'))d=new Date(parts.split('/').reverse().join('-'));
+    else d=new Date(parts);
+    if(isNaN(d))return 9999;
+    return Math.round((d-TODAY)/(1000*60*60*24));
+  }catch{return 9999;}
+}
+
+function expiryCell(exp){
+  if(!exp||exp==='-')return'-';
+  const days=expiryDays(exp);
+  if(days<0)return`<span class="nred">⚠️ ${exp}</span>`;
+  if(days<=180)return`<span class="nyel">⏰ ${exp}</span>`;
+  return`<span class="ngrn">${exp}</span>`;
+}
+
+/* ══════════════════════════════
+   FILTERS
+══════════════════════════════ */
+function getD(tab){
+  let d=[...ALL];
+  const s=SRC[tab];
+  if(s==='AlUla')d=d.filter(r=>r.srcType==='AlUla');
+  else if(s==='NUPCO')d=d.filter(r=>r.srcType==='NUPCO');
+  else if(s==='dept')d=d.filter(r=>r.destType==='dept');
+  else if(s==='center')d=d.filter(r=>r.destType==='center');
+  const q=SEARCH[tab].toLowerCase();
+  if(q)d=d.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+  return d;
+}
+function setSrc(tab,val,el){SRC[tab]=val;PAGES[tab]=1;el.closest('.stabs').querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderTab(tab);}
+function onSearch(tab,v){SEARCH[tab]=v;PAGES[tab]=1;renderTab(tab);}
+function gp(tab,p){PAGES[tab]=p;renderTab(tab);}
+
+/* ══════════════════════════════
+   TABLE RENDERER
+══════════════════════════════ */
+const PS=20;
+function renderTable(contId,data,tab,cols){
+  const pg=PAGES[tab],total=data.length,pages=Math.ceil(total/PS)||1;
+  const slice=data.slice((pg-1)*PS,pg*PS);
+  const rows=slice.map(r=>'<tr>'+cols.map(col=>{
+    const v=r[col.k]??'';
+    if(col.k==='destType')return`<td>${r.destType==='dept'?'<span class="badge b-dept">🏨 قسم</span>':'<span class="badge b-center">🏢 مركز</span>'}</td>`;
+    if(col.k==='srcType')return`<td>${r.srcType==='NUPCO'?'<span class="badge b-nupco">NUPCO</span>':'<span class="badge b-alula">موصول العلا</span>'}</td>`;
+    if(col.k==='expiry')return`<td>${expiryCell(v)}</td>`;
+    if(col.k==='qty')return`<td class="ncyn">${v?fn(v):'-'}</td>`;
+    if(col.k==='consignee'||col.k==='item')return`<td title="${v}">${String(v).slice(0,32)+(String(v).length>32?'…':'')}</td>`;
+    return`<td>${v||'-'}</td>`;
+  }).join('')+'</tr>').join('');
+
+  document.getElementById(contId).innerHTML=`
+    <div class="ttop">
+      <span class="tt">${total} سجل</span>
+      <input class="sr" placeholder="🔍 بحث..." value="${SEARCH[tab]}" oninput="onSearch(${tab},this.value)">
+    </div>
+    <div class="ts"><table>
+      <thead><tr>${cols.map(c=>`<th>${c.l}</th>`).join('')}</tr></thead>
+      <tbody>${rows||`<tr><td colspan="${cols.length}" class="ndt">لا توجد بيانات</td></tr>`}</tbody>
+    </table></div>
+    <div class="pgr">
+      <span>عرض ${total?((pg-1)*PS+1):0}–${Math.min(pg*PS,total)} من ${total}</span>
+      <div class="pgbs">${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="pgb${i+1===pg?' on':''}" onclick="gp(${tab},${i+1})">${i+1}</button>`).join('')}</div>
+    </div>`;
+}
+
+/* ══════════════════════════════
+   TAB RENDERERS
+══════════════════════════════ */
+function rOverview(){
+  const d=ALL,N=d.length;
+  const alula=d.filter(r=>r.srcType==='AlUla').length;
+  const nupco=d.filter(r=>r.srcType==='NUPCO').length;
+  const depts=d.filter(r=>r.destType==='dept').length;
+  const centers=d.filter(r=>r.destType==='center').length;
+  const uOrders=new Set(d.map(r=>r.order)).size;
+  const totalQty=d.reduce((s,r)=>s+(r.qty||0),0);
+  const expSoon=d.filter(r=>{const x=expiryDays(r.expiry);return x>=0&&x<=180;}).length;
+  const expired=d.filter(r=>expiryDays(r.expiry)<0).length;
+
+  document.getElementById('tc0').textContent=N;
+  document.getElementById('k0').innerHTML=
+    kpi('var(--cyan)','📦','إجمالي السجلات',fn(N),'')+
+    kpi('#4ade80','📋','أوامر فريدة',fn(uOrders),'Order / SID')+
+    kpi('#fb923c','🏙️','شحنات NUPCO',fn(nupco),pct(nupco,N))+
+    kpi('#60a5fa','🏥','شحنات موصول العلا',fn(alula),pct(alula,N))+
+    kpi('#a78bfa','🏨','طلبات الأقسام',fn(depts),new Set(d.filter(r=>r.destType==='dept').map(r=>r.consignee)).size+' قسم')+
+    kpi('#2dd4bf','🏢','طلبات المراكز',fn(centers),new Set(d.filter(r=>r.destType==='center'&&r.consignee).map(r=>r.consignee)).size+' مركز')+
+    kpi('#facc15','📦','إجمالي الكميات',fn(totalQty),'وحدة')+
+    kpi('#f87171','📅','صلاحية ≤6 أشهر',fn(expSoon),expired?expired+' منتهية':'');
+
+  document.getElementById('fd1').textContent=nupco+' شحنة';
+  document.getElementById('fd2').textContent=alula+' شحنة';
+  document.getElementById('fd3').textContent=depts+' طلب';
+  document.getElementById('fd4').textContent=centers+' طلب';
+
+  const als=[];
+  if(expired)als.push({c:'al-r',i:'🚨',t:`<b>${expired}</b> صنف انتهت صلاحيته — يحتاج مراجعة عاجلة`});
+  if(expSoon)als.push({c:'al-o',i:'⏰',t:`<b>${expSoon}</b> صنف تنتهي صلاحيته خلال 6 أشهر`});
+  document.getElementById('al0').innerHTML=alertBox(als);
+
+  const dateMap={};d.forEach(r=>{if(r.procDate){const k=r.procDate.slice(0,10);dateMap[k]=(dateMap[k]||0)+1;}});
+  const dates=Object.keys(dateMap).sort();
+  document.getElementById('cg0').innerHTML=cc('المصدر: موصول العلا vs NUPCO','c0-src')+cc('السجلات حسب تاريخ المعالجة','c0-date');
+  setTimeout(()=>{
+    donut('c0-src',['موصول العلا','NUPCO'],[alula,nupco],['#0ea5e9','#f97316']);
+    barV('c0-date',dates,dates.map(k=>dateMap[k]),'#8b5cf6');
+  },50);
+}
+
+function rOrders(){
+  const d=getD(1);const N=d.length;
+  const uO=new Set(d.map(r=>r.order)).size;
+  const totalQty=d.reduce((s,r)=>s+(r.qty||0),0);
+  const expSoon=d.filter(r=>{const x=expiryDays(r.expiry);return x>=0&&x<=180;}).length;
+  const expired=d.filter(r=>expiryDays(r.expiry)<0).length;
+
+  document.getElementById('tc1').textContent=ALL.length;
+  document.getElementById('k1').innerHTML=
+    kpi('var(--cyan)','📋','السجلات',fn(N),'')+
+    kpi('#4ade80','📑','أوامر فريدة',fn(uO),'')+
+    kpi('#fb923c','🏙️','NUPCO',fn(d.filter(r=>r.srcType==='NUPCO').length),'')+
+    kpi('#60a5fa','🏥','موصول العلا',fn(d.filter(r=>r.srcType==='AlUla').length),'')+
+    kpi('#facc15','📦','الكميات',fn(totalQty),'وحدة')+
+    kpi('#f87171','📅','صلاحية ≤6م',fn(expSoon),expired?expired+' منتهية':'');
+
+  const als=[];
+  if(expired)als.push({c:'al-r',i:'🚨',t:`<b>${expired}</b> صنف انتهت صلاحيته`});
+  if(expSoon)als.push({c:'al-o',i:'⏰',t:`<b>${expSoon}</b> صنف تنتهي صلاحيته خلال 6 أشهر`});
+  document.getElementById('al1').innerHTML=alertBox(als);
+
+  const cMap={};d.forEach(r=>{if(r.consignee){const k=r.consignee.slice(0,28);cMap[k]=(cMap[k]||0)+1;}});
+  const top=Object.entries(cMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const fMap={};d.forEach(r=>{if(r.family)fMap[r.family]=(fMap[r.family]||0)+1;});
+  const topF=Object.entries(fMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  document.getElementById('cg1').innerHTML=cc('أكثر الجهات استلاماً','c1-c','h185')+cc('تصنيف الأصناف','c1-f','h185');
+  setTimeout(()=>{
+    barH('c1-c',top,i=>i%2===0?'#a78bfa88':'#2dd4bf88');
+    barH('c1-f',topF);
+  },50);
+
+  const cols=[
+    {k:'order',l:'رقم الطلب'},{k:'srcType',l:'المصدر'},{k:'destType',l:'النوع'},
+    {k:'consignee',l:'الجهة الطالبة'},{k:'item',l:'الصنف'},{k:'family',l:'تصنيف'},
+    {k:'qty',l:'الكمية'},{k:'expiry',l:'الصلاحية'},{k:'user',l:'المستخدم'},{k:'procDate',l:'التاريخ'}
+  ];
+  renderTable('t1',d,1,cols);
+}
+
+function rDepts(){
+  const d=ALL.filter(r=>r.destType==='dept');const N=d.length;
+  const dMap={};d.forEach(r=>{if(r.consignee)dMap[r.consignee]=(dMap[r.consignee]||0)+1;});
+  const top=Object.entries(dMap).sort((a,b)=>b[1]-a[1]);
+  const fMap={};d.forEach(r=>{if(r.family)fMap[r.family]=(fMap[r.family]||0)+1;});
+  const topF=Object.entries(fMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const totalQty=d.reduce((s,r)=>s+(r.qty||0),0);
+
+  document.getElementById('tc2').textContent=N;
+  document.getElementById('k2').innerHTML=
+    kpi('#a78bfa','🏨','طلبات الأقسام',fn(N),'')+
+    kpi('var(--cyan)','🏥','أقسام مختلفة',fn(top.length),'')+
+    kpi('#4ade80','⭐','أكثر قسم',top[0]?top[0][0].slice(0,14):'',top[0]?top[0][1]+' طلب':'')+
+    kpi('#facc15','📦','إجمالي الكميات',fn(totalQty),'وحدة');
+
+  document.getElementById('cg2').innerHTML=cc('توزيع على الأقسام','c2-d','h185')+cc('تصنيف المواد','c2-f','h185');
+  setTimeout(()=>{
+    barH('c2-d',top);
+    donut('c2-f',topF.map(f=>f[0]),topF.map(f=>f[1]),topF.map((_,i)=>`hsl(${195+i*30},62%,52%)`));
+  },50);
+
+  const cols=[{k:'order',l:'رقم الطلب'},{k:'consignee',l:'القسم'},{k:'item',l:'الصنف'},{k:'family',l:'تصنيف'},{k:'qty',l:'الكمية'},{k:'expiry',l:'الصلاحية'},{k:'user',l:'المستخدم'},{k:'truck',l:'الشاحنة'},{k:'procDate',l:'التاريخ'}];
+  renderTable('t2',d,2,cols);
+}
+
+function rCenters(){
+  const d=ALL.filter(r=>r.destType==='center');const N=d.length;
+  const cMap={};d.forEach(r=>{if(r.consignee)cMap[r.consignee]=(cMap[r.consignee]||0)+1;});
+  const top=Object.entries(cMap).sort((a,b)=>b[1]-a[1]);
+  const fMap={};d.forEach(r=>{if(r.family)fMap[r.family]=(fMap[r.family]||0)+1;});
+  const topF=Object.entries(fMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  document.getElementById('tc3').textContent=N;
+  document.getElementById('k3').innerHTML=
+    kpi('#2dd4bf','🏢','طلبات المراكز MOH',fn(N),'')+
+    kpi('var(--cyan)','🏥','مراكز مختلفة',fn(top.length),'')+
+    kpi('#4ade80','⭐','أكثر مركز',top[0]?top[0][0].slice(0,18):'',top[0]?top[0][1]+' طلب':'')+
+    kpi('#fb923c','🏙️','كل الشحنات من NUPCO',fn(d.filter(r=>r.srcType==='NUPCO').length),pct(d.filter(r=>r.srcType==='NUPCO').length,N));
+
+  document.getElementById('cg3').innerHTML=cc('توزيع على المراكز','c3-c','h185')+cc('تصنيف المواد','c3-f','h185');
+  setTimeout(()=>{
+    barH('c3-c',top.map(([k,v])=>[k.slice(0,26),v]));
+    donut('c3-f',topF.map(f=>f[0]),topF.map(f=>f[1]),topF.map((_,i)=>`hsl(${175+i*30},62%,52%)`));
+  },50);
+
+  const cols=[{k:'order',l:'رقم الطلب'},{k:'srcType',l:'المصدر'},{k:'consignee',l:'المركز / المستشفى'},{k:'item',l:'الصنف'},{k:'family',l:'تصنيف'},{k:'expiry',l:'الصلاحية'},{k:'user',l:'المستخدم'},{k:'procDate',l:'التاريخ'}];
+  renderTable('t3',d,3,cols);
+}
+
+function rItems(){
+  const d=ALL;const N=d.length;
+  const expSoon=d.filter(r=>{const x=expiryDays(r.expiry);return x>=0&&x<=180;});
+  const expired=d.filter(r=>expiryDays(r.expiry)<0);
+
+  document.getElementById('tc4').textContent=N;
+  document.getElementById('k4').innerHTML=
+    kpi('var(--cyan)','💊','إجمالي الأصناف',fn(N),'')+
+    kpi('#4ade80','✅','صلاحية جيدة',fn(N-expSoon.length-expired.length),'>6 أشهر')+
+    kpi('#facc15','⏰','تنتهي قريباً',fn(expSoon.length),'خلال 6 أشهر')+
+    kpi('#f87171','🚨','منتهية الصلاحية',fn(expired.length),'يحتاج مراجعة');
+
+  const als=[];
+  if(expired.length){
+    const names=expired.map(r=>r.item).filter((v,i,a)=>a.indexOf(v)===i).slice(0,3).join('، ');
+    als.push({c:'al-r',i:'🚨',t:`<b>${expired.length}</b> صنف منتهي الصلاحية: ${names}${expired.length>3?'...':''}`});
+  }
+  if(expSoon.length)als.push({c:'al-o',i:'⏰',t:`<b>${expSoon.length}</b> صنف تنتهي صلاحيته خلال 6 أشهر`});
+  document.getElementById('al4').innerHTML=alertBox(als);
+
+  const iMap={};d.forEach(r=>{if(r.item)iMap[r.item]=(iMap[r.item]||0)+1;});
+  const topI=Object.entries(iMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const fMap={};d.forEach(r=>{if(r.family)fMap[r.family]=(fMap[r.family]||0)+1;});
+  const topF=Object.entries(fMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  document.getElementById('cg4').innerHTML=cc('الأصناف الأكثر تكراراً','c4-i','h185')+cc('تصنيف الأصناف','c4-f','h185');
+  setTimeout(()=>{
+    barH('c4-i',topI.map(([k,v])=>[k.slice(0,28),v]));
+    barH('c4-f',topF,i=>`hsl(${195+i*22},62%,52%)`);
+  },50);
+
+  const cols=[{k:'order',l:'رقم الطلب'},{k:'item',l:'اسم الصنف'},{k:'family',l:'التصنيف'},{k:'qty',l:'الكمية'},{k:'expiry',l:'الصلاحية'},{k:'consignee',l:'الجهة'},{k:'destType',l:'النوع'},{k:'user',l:'المستخدم'},{k:'procDate',l:'التاريخ'}];
+  renderTable('t4',d,4,cols);
+}
+
+/* ══════════════════════════════
+   TAB SWITCH + RENDER
+══════════════════════════════ */
+function sTab(i,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+i).classList.add('active');
+}
+function renderTab(tab){
+  if(tab===0)rOverview();
+  else if(tab===1)rOrders();
+  else if(tab===2)rDepts();
+  else if(tab===3)rCenters();
+  else if(tab===4)rItems();
+}
+function renderAll(){
+  rOverview();rOrders();rDepts();rCenters();rItems();
+}
+
+/* ══ INIT ══ */
+renderAll();
+</script>
+</body>
+</html>
