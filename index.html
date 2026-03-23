@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>أرشيف فواتير التسليم - نوبكو</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -74,8 +73,9 @@ header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-botto
 .btn-excel{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);}
 .btn-img{background:rgba(14,165,233,.1);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
 .btn-excel:hover{background:rgba(16,185,129,.2);}.btn-img:hover{background:rgba(14,165,233,.2);}
-.btn-drive{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:14px;font-size:15px;box-shadow:0 4px 15px rgba(245,158,11,.3);}
-.btn-drive:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(245,158,11,.4);}
+.btn-drive{width:100%;background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px;font-size:15px;box-shadow:0 4px 15px rgba(16,185,129,.3);}
+.btn-drive:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(16,185,129,.4);}
+.btn-drive:disabled{background:var(--surface2);color:var(--muted);box-shadow:none;cursor:not-allowed;}
 .twrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .tscroll{overflow-x:auto;max-height:380px;overflow-y:auto;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -87,37 +87,19 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
 .tnew{background:rgba(16,185,129,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
 .told{background:rgba(100,116,139,.15);color:var(--muted);border-radius:4px;padding:2px 7px;font-size:10px;}
 .sok{color:var(--green);font-weight:600;}.serr{color:var(--red);font-weight:600;}
-.glogin-btn{background:white;color:#333;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;grid-column:1/-1;}
-.glogin-btn img{width:18px;height:18px;}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+  <input type="hidden" id="apiKey" value="ضع_مفتاح_OpenRouter_هنا"/>
+  <input type="hidden" id="gScriptUrl" value="ضع_رابط_السكربت_هنا"/>
+  <input type="hidden" id="mdl" value="google/gemini-2.0-flash-001"/>
+  <div class="wrap">
   <header>
     <div class="logo">📦</div>
-    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · رفع مباشر إلى Google Drive</p></div>
+    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · رفع مباشر وتلقائي إلى الدرايف</p></div>
   </header>
   
-  <div class="card">
-    <div class="ctitle">⚙ الإعدادات وربط Google Drive</div>
-    <div class="g2">
-      <div class="f"><label>OpenRouter API Key</label><input type="password" id="apiKey" placeholder="sk-or-v1-..."/></div>
-      <div class="f"><label>النموذج</label>
-        <select id="mdl">
-          <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (اقتصادي)</option>
-          <option value="anthropic/claude-haiku-4-5">Claude Haiku 4.5</option>
-          <option value="anthropic/claude-sonnet-4-6">Claude Sonnet 4.6 (أدق)</option>
-        </select>
-      </div>
-      <div class="f"><label>Google Client ID</label><input type="password" id="gClientId" placeholder="ينتهي بـ apps.googleusercontent.com"/></div>
-      <div class="f"><label>Google Folder ID</label><input type="text" id="gFolderId" placeholder="مثل: 1A2b3C4d5E6f7G..."/></div>
-      <button class="glogin-btn" id="gLoginBtn" onclick="handleGoogleLogin()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google"> 
-        تسجيل الدخول بحساب جوجل (مطلوب للرفع)
-      </button>
-    </div>
-  </div>
-
   <div class="card">
     <div class="ctitle">📂 الأرشيف السابق (اختياري)</div>
     <div class="istrip" onclick="document.getElementById('archiveInput').click()">
@@ -165,7 +147,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         <button class="dlbtn btn-excel" onclick="downloadExcelLocal()">📊 تحميل محلي (Excel)</button>
         <button class="dlbtn btn-img" onclick="downloadImagesLocal()">🖼️ تحميل محلي (ZIP)</button>
       </div>
-      <button class="dlbtn btn-drive" id="driveBtn" onclick="uploadAllToDrive()">🚀 رفع كل شيء إلى Google Drive مباشرة</button>
+      <button class="dlbtn btn-drive" id="driveBtn" onclick="uploadAllToDrive()">🚀 حفظ وإرسال إلى الإدارة (Google Drive)</button>
     </div>
     <div class="twrap">
       <div class="tscroll">
@@ -179,48 +161,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
 </div>
 
 <script>
-// متغيرات جوجل درايف
-let tokenClient;
-let gDriveToken = null;
-
-function handleGoogleLogin() {
-  const clientId = document.getElementById('gClientId').value.trim();
-  if (!clientId) { alert('يرجى إدخال Google Client ID أولاً'); return; }
-  
-  if(typeof google === 'undefined') { alert('تعذر تحميل مكتبة جوجل، يرجى التأكد من اتصال الإنترنت.'); return; }
-
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    callback: (tokenResponse) => {
-      if (tokenResponse && tokenResponse.access_token) {
-        gDriveToken = tokenResponse.access_token;
-        const btn = document.getElementById('gLoginBtn');
-        btn.style.background = '#e6f4ea';
-        btn.style.borderColor = '#34a853';
-        btn.style.color = '#137333';
-        btn.innerHTML = '✓ تم ربط الحساب بنجاح';
-      }
-    },
-  });
-  tokenClient.requestAccessToken();
-}
-
-async function uploadFileToDrive(fileBlob, fileName, mimeType, folderId) {
-  const metadata = { name: fileName, parents: [folderId] };
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', fileBlob);
-
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + gDriveToken },
-    body: form
-  });
-  if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-  return await res.json();
-}
-
 let imgs=[],newRecs=[],oldRecs=[];
 const HDRS=['File Name','Order Number','Order Create Date','Shipment Number','Dispatch Date','Dispatched User','Sender','Consignee','Pharmacy Code','City','Line','Item No','Description','Item Family','Client ID','Quantity','Batch','Expiry Date','Total Quantity','Truck Number','Pallets Count','Processed Date'];
 const KEYS=['_file','order_number','order_create_date','shipment_number','dispatch_date','dispatched_user','sender','consignee','pharmacy_code','city','line','item_no','description','item_family','client_id','quantity','batch','expiry_date','total_quantity','truck_number','pallets_count','_date'];
@@ -274,7 +214,7 @@ function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onl
 async function extract(file){
   const key=document.getElementById('apiKey').value.trim();
   const model=document.getElementById('mdl').value;
-  if(!key)throw new Error('API Key مفقود');
+  if(!key)throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
   const b=await b64(file);
   const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':location.href,'X-Title':'NUPCO Invoice Archiver'},
@@ -301,7 +241,7 @@ function log(msg,cls){
 
 async function processAll(){
   const key=document.getElementById('apiKey').value.trim();
-  if(!key){alert('يرجى إدخال API Key أولاً');return;}
+  if(!key){alert('الرقم السري غير موجود. تأكد من إعدادات الملف من قبل الإدارة.');return;}
   if(!imgs.length)return;
   newRecs=[];
   const btn=document.getElementById('pbtn');btn.disabled=true;document.getElementById('btxt').textContent='جاري المعالجة...';
@@ -407,47 +347,56 @@ async function downloadImagesLocal() {
   link.click();
 }
 
-// دالة الرفع المباشر لجوجل درايف
+async function uploadToAppsScript(base64Data, fileName, mimeType, scriptUrl) {
+  const payload = { base64: base64Data, fileName: fileName, mimeType: mimeType };
+  const res = await fetch(scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
 async function uploadAllToDrive() {
-  if (!gDriveToken) return alert('يرجى تسجيل الدخول لحساب جوجل أولاً من خانة الإعدادات فوق.');
-  const folderId = document.getElementById('gFolderId').value.trim();
-  if (!folderId) return alert('يرجى إدخال Folder ID الخاص بمجلدك في Google Drive.');
+  const scriptUrl = document.getElementById('gScriptUrl').value.trim();
+  if (!scriptUrl) return alert('رابط الإرسال غير متوفر، يرجى مراجعة الإدارة.');
+
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (successRecs.length === 0 && oldRecs.length === 0) return alert('لا توجد فواتير للرفع!');
 
   const btn = document.getElementById('driveBtn');
   const oldText = btn.innerHTML;
-  btn.innerHTML = '⏳ جاري الرفع إلى Google Drive... الرجاء الانتظار';
+  btn.innerHTML = '⏳ جاري الإرسال للدرايف... يرجى الانتظار';
   btn.disabled = true;
 
   try {
-    const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
-    log('بدء الرفع إلى جوجل درايف...', 'linf');
+    log('بدء الرفع المباشر...', 'linf');
 
-    // 1. رفع ملف الإكسل
     const wb = generateExcelWorkbook();
-    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const excelName = 'Delivery_Archive_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    const excelBase64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+    const excelName = 'Archive_' + new Date().toISOString().slice(0,10) + '.xlsx';
     
     log('جاري رفع ملف Excel...', 'linf');
-    await uploadFileToDrive(excelBlob, excelName, excelBlob.type, folderId);
+    await uploadToAppsScript(excelBase64, excelName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', scriptUrl);
     log('✓ تم رفع Excel بنجاح', 'lok');
 
-    // 2. رفع الصور
     for (let i = 0; i < successRecs.length; i++) {
       const rec = successRecs[i];
       const ext = rec._file.split('.').pop();
       const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
       const finalName = `${safeName}.${ext}`;
       
+      const imgBase64 = await b64(rec._rawFile);
       log(`جاري رفع الصورة: ${finalName}`, 'linf');
-      await uploadFileToDrive(rec._rawFile, finalName, rec._rawFile.type, folderId);
+      await uploadToAppsScript(imgBase64, finalName, rec._rawFile.type, scriptUrl);
     }
-    log('🎉 اكتمل الرفع لجوجل درايف بالكامل!', 'lok');
-    alert('تم رفع ملف الإكسل وجميع الصور بنجاح إلى جوجل درايف!');
+
+    log('🎉 اكتمل الرفع إلى المجلد المشترك بنجاح!', 'lok');
+    alert('تم إرسال الأرشيف والصور إلى الإدارة بنجاح!');
 
   } catch (error) {
     log('✗ حدث خطأ أثناء الرفع: ' + error.message, 'lerr');
-    alert('حدث خطأ أثناء الرفع: ' + error.message);
+    alert('حدث خطأ أثناء الرفع، التأكد من اتصال الإنترنت.');
   } finally {
     btn.innerHTML = oldText;
     btn.disabled = false;
