@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>أرشيف فواتير التسليم - نوبكو</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -24,20 +25,19 @@ header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-botto
 .f{display:flex;flex-direction:column;gap:6px;}.f label{font-size:12px;color:var(--muted);font-weight:500;}
 .f input,.f select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;transition:border-color .2s;width:100%;}
 .f input:focus,.f select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1);}
-.f input::placeholder{color:var(--muted);}
 .istrip{display:flex;align-items:center;gap:14px;border:1px dashed var(--border);border-radius:12px;padding:14px 16px;background:var(--card);cursor:pointer;transition:all .2s;}
 .istrip:hover{border-color:var(--accent);background:rgba(14,165,233,.04);}
 .istrip .ico{font-size:26px;flex-shrink:0;}.istrip .itxt h4{font-size:13px;font-weight:600;margin-bottom:2px;}.istrip .itxt p{font-size:11px;color:var(--muted);}
 .istat{margin-right:auto;font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;}
 .istat.none{background:rgba(100,116,139,.12);color:var(--muted);}.istat.ok{background:rgba(16,185,129,.15);color:var(--green);}
 .ibtn{flex-shrink:0;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:var(--accent);padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
-.ibtn:hover{background:rgba(14,165,233,.2);}#archiveInput{display:none;}
+.ibtn:hover{background:rgba(14,165,233,.2);}
 .upzone{border:2px dashed var(--border);border-radius:16px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card);margin-bottom:18px;}
 .upzone:hover,.upzone.over{border-color:var(--accent);background:rgba(14,165,233,.05);}
 .upico{font-size:44px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 10px rgba(14,165,233,.4));}
 .upzone h2{font-size:16px;font-weight:600;margin-bottom:5px;}.upzone p{font-size:13px;color:var(--muted);margin-bottom:14px;}
 .ubtn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;padding:10px 22px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s;}
-.ubtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,165,233,.3);}#fileInput{display:none;}
+.ubtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,165,233,.3);}
 .prev-sec{margin-bottom:18px;display:none;}.prev-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .prev-hdr h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
 .cbadge{background:var(--accent);color:white;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;}
@@ -67,15 +67,15 @@ header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-botto
 .sl{font-size:11px;color:var(--muted);margin-top:2px;display:block;}
 .sc.tot .sv{color:var(--accent);}.sc.nw .sv{color:var(--green);}.sc.er .sv{color:var(--red);}
 .dlcard{background:var(--surface);border:1px solid rgba(16,185,129,.35);border-radius:14px;padding:18px;margin-bottom:16px;}
-.dlcard h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
-.dlcard p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
-.dlbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
-.btn-excel{background:linear-gradient(135deg,#10b981,#059669);color:white;}
-.btn-excel:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(16,185,129,.35);}
-.btn-img{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;}
-.btn-img:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(14,165,233,.35);}
-.btn-group{display:flex;gap:10px;flex-wrap:wrap;}
-.btn-group > *{flex:1;min-width:200px;}
+.dlcard h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.btn-group > *{flex:1;min-width:180px;}
+.dlbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.btn-excel{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.btn-img{background:rgba(14,165,233,.1);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
+.btn-excel:hover{background:rgba(16,185,129,.2);}.btn-img:hover{background:rgba(14,165,233,.2);}
+.btn-drive{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:14px;font-size:15px;box-shadow:0 4px 15px rgba(245,158,11,.3);}
+.btn-drive:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(245,158,11,.4);}
 .twrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .tscroll{overflow-x:auto;max-height:380px;overflow-y:auto;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
@@ -87,49 +87,54 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
 .tnew{background:rgba(16,185,129,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
 .told{background:rgba(100,116,139,.15);color:var(--muted);border-radius:4px;padding:2px 7px;font-size:10px;}
 .sok{color:var(--green);font-weight:600;}.serr{color:var(--red);font-weight:600;}
-::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-track{background:var(--card);}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+.glogin-btn{background:white;color:#333;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;font-family:inherit;font-size:13px;grid-column:1/-1;}
+.glogin-btn img{width:18px;height:18px;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="logo">📦</div>
-    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · يضيف على نفس ملف Excel في كل جلسة</p></div>
-    <div class="badge">🔒 بياناتك محلية</div>
+    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · رفع مباشر إلى Google Drive</p></div>
   </header>
+  
   <div class="card">
-    <div class="ctitle">⚙ الإعدادات</div>
+    <div class="ctitle">⚙ الإعدادات وربط Google Drive</div>
     <div class="g2">
       <div class="f"><label>OpenRouter API Key</label><input type="password" id="apiKey" placeholder="sk-or-v1-..."/></div>
       <div class="f"><label>النموذج</label>
         <select id="mdl">
           <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (اقتصادي)</option>
-          <option value="meta-llama/llama-4-maverick">Llama 4 Maverick</option>
           <option value="anthropic/claude-haiku-4-5">Claude Haiku 4.5</option>
           <option value="anthropic/claude-sonnet-4-6">Claude Sonnet 4.6 (أدق)</option>
-          <option value="anthropic/claude-opus-4-6">Claude Opus 4.6 (الأدق)</option>
         </select>
       </div>
+      <div class="f"><label>Google Client ID</label><input type="password" id="gClientId" placeholder="ينتهي بـ apps.googleusercontent.com"/></div>
+      <div class="f"><label>Google Folder ID</label><input type="text" id="gFolderId" placeholder="مثل: 1A2b3C4d5E6f7G..."/></div>
+      <button class="glogin-btn" id="gLoginBtn" onclick="handleGoogleLogin()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google"> 
+        تسجيل الدخول بحساب جوجل (مطلوب للرفع)
+      </button>
     </div>
   </div>
+
   <div class="card">
     <div class="ctitle">📂 الأرشيف السابق (اختياري)</div>
     <div class="istrip" onclick="document.getElementById('archiveInput').click()">
       <div class="ico">📊</div>
-      <div class="itxt"><h4>ارفع ملف Excel الأرشيف السابق</h4><p>تضاف السجلات الجديدة عليه تلقائياً عند التحميل</p></div>
+      <div class="itxt"><h4>ارفع ملف Excel الأرشيف السابق</h4><p>تضاف السجلات الجديدة عليه تلقائياً</p></div>
       <span class="istat none" id="istat">لا يوجد ملف</span>
-      <button class="ibtn" onclick="event.stopPropagation();document.getElementById('archiveInput').click()">📂 اختر</button>
     </div>
-    <input type="file" id="archiveInput" accept=".xlsx,.xls,.csv"/>
+    <input type="file" id="archiveInput" accept=".xlsx,.xls,.csv" style="display:none;"/>
   </div>
+
   <div class="upzone" id="upzone">
-    <span class="upico">🗂️</span>
-    <h2>ارفع صور الفواتير الجديدة</h2>
-    <p>اسحب الصور هنا أو اضغط للاختيار · JPG, PNG, WEBP · عدة صور مع بعض</p>
+    <span class="upico">🗂️</span><h2>ارفع صور الفواتير الجديدة</h2>
+    <p>اسحب الصور هنا أو اضغط للاختيار · JPG, PNG, WEBP</p>
     <button class="ubtn" onclick="document.getElementById('fileInput').click()">📎 اختر الصور</button>
-    <input type="file" id="fileInput" accept="image/*" multiple/>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;"/>
   </div>
+
   <div class="prev-sec" id="prevSec">
     <div class="prev-hdr">
       <h3>الصور المحددة <span class="cbadge" id="cnt">0</span></h3>
@@ -137,14 +142,17 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
     </div>
     <div class="pgrid" id="pgrid"></div>
   </div>
+
   <button class="pbtn" id="pbtn" disabled onclick="processAll()">
     <span id="bico">⚡</span><span id="btxt">ارفع صوراً للبدء</span>
   </button>
+
   <div class="progsec" id="progsec">
     <div class="proghdr"><h3>⏳ جاري المعالجة...</h3><span class="prognum" id="pnum">0 / 0</span></div>
     <div class="bwrap"><div class="bfill" id="bfill"></div></div>
     <div class="logbox" id="logbox"></div>
   </div>
+
   <div class="ressec" id="ressec">
     <div class="srow">
       <div class="sc tot"><span class="sv" id="stot">0</span><span class="sl">إجمالي الأرشيف</span></div>
@@ -152,12 +160,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       <div class="sc er"><span class="sv" id="serr">0</span><span class="sl">أخطاء</span></div>
     </div>
     <div class="dlcard">
-      <h4>📥 تحميل النتائج</h4>
-      <p>يمكنك تحميل الأرشيف المحدث، وكذلك تحميل الصور بعد إعادة تسميتها برقم الطلب المستخرج.</p>
+      <h4>☁️ الحفظ في التخزين السحابي</h4>
       <div class="btn-group">
-        <button class="dlbtn btn-excel" onclick="dlExcel()">📊 تحميل Excel</button>
-        <button class="dlbtn btn-img" id="dlImgBtn" onclick="dlImages()">🖼️ تحميل الصور (ZIP)</button>
+        <button class="dlbtn btn-excel" onclick="downloadExcelLocal()">📊 تحميل محلي (Excel)</button>
+        <button class="dlbtn btn-img" onclick="downloadImagesLocal()">🖼️ تحميل محلي (ZIP)</button>
       </div>
+      <button class="dlbtn btn-drive" id="driveBtn" onclick="uploadAllToDrive()">🚀 رفع كل شيء إلى Google Drive مباشرة</button>
     </div>
     <div class="twrap">
       <div class="tscroll">
@@ -169,16 +177,61 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
     </div>
   </div>
 </div>
+
 <script>
+// متغيرات جوجل درايف
+let tokenClient;
+let gDriveToken = null;
+
+function handleGoogleLogin() {
+  const clientId = document.getElementById('gClientId').value.trim();
+  if (!clientId) { alert('يرجى إدخال Google Client ID أولاً'); return; }
+  
+  if(typeof google === 'undefined') { alert('تعذر تحميل مكتبة جوجل، يرجى التأكد من اتصال الإنترنت.'); return; }
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback: (tokenResponse) => {
+      if (tokenResponse && tokenResponse.access_token) {
+        gDriveToken = tokenResponse.access_token;
+        const btn = document.getElementById('gLoginBtn');
+        btn.style.background = '#e6f4ea';
+        btn.style.borderColor = '#34a853';
+        btn.style.color = '#137333';
+        btn.innerHTML = '✓ تم ربط الحساب بنجاح';
+      }
+    },
+  });
+  tokenClient.requestAccessToken();
+}
+
+async function uploadFileToDrive(fileBlob, fileName, mimeType, folderId) {
+  const metadata = { name: fileName, parents: [folderId] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', fileBlob);
+
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + gDriveToken },
+    body: form
+  });
+  if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+  return await res.json();
+}
+
 let imgs=[],newRecs=[],oldRecs=[];
 const HDRS=['File Name','Order Number','Order Create Date','Shipment Number','Dispatch Date','Dispatched User','Sender','Consignee','Pharmacy Code','City','Line','Item No','Description','Item Family','Client ID','Quantity','Batch','Expiry Date','Total Quantity','Truck Number','Pallets Count','Processed Date'];
 const KEYS=['_file','order_number','order_create_date','shipment_number','dispatch_date','dispatched_user','sender','consignee','pharmacy_code','city','line','item_no','description','item_family','client_id','quantity','batch','expiry_date','total_quantity','truck_number','pallets_count','_date'];
 const PROMPT='Extract these fields from this Goods Delivery Note image. Return ONLY a JSON object, no markdown:\n{"order_number":"","order_create_date":"","shipment_number":"","dispatch_date":"","dispatched_user":"","sender":"","consignee":"","pharmacy_code":"","city":"","line":"","item_no":"","description":"","item_family":"","client_id":"","quantity":"","batch":"","expiry_date":"","total_quantity":"","truck_number":"","pallets_count":""}\nUse "" for any missing field.';
+
 const uz=document.getElementById('upzone');
 uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('over');});
 uz.addEventListener('dragleave',()=>uz.classList.remove('over'));
 uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');addImgs([...e.dataTransfer.files]);});
 document.getElementById('fileInput').addEventListener('change',e=>addImgs([...e.target.files]));
+
 function addImgs(files){imgs=[...imgs,...files.filter(f=>f.type.startsWith('image/'))];render();}
 function render(){
   const sec=document.getElementById('prevSec'),btn=document.getElementById('pbtn');
@@ -191,6 +244,7 @@ function render(){
 }
 function rmImg(i){imgs.splice(i,1);render();}
 function clearImgs(){imgs=[];document.getElementById('fileInput').value='';render();}
+
 document.getElementById('archiveInput').addEventListener('change',async function(e){
   const file=e.target.files[0];if(!file)return;
   try{
@@ -214,7 +268,9 @@ document.getElementById('archiveInput').addEventListener('change',async function
     log('استيراد الأرشيف: '+oldRecs.length+' سجل قديم','lok');
   }catch(err){alert('خطأ: '+err.message);}
 });
+
 function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+
 async function extract(file){
   const key=document.getElementById('apiKey').value.trim();
   const model=document.getElementById('mdl').value;
@@ -237,10 +293,12 @@ async function extract(file){
   p._status='success';p._isOld=false;
   return p;
 }
+
 function log(msg,cls){
   const b=document.getElementById('logbox');const el=document.createElement('div');el.className=cls||'linf';
   el.textContent='['+new Date().toLocaleTimeString('ar-SA')+'] '+msg;b.appendChild(el);b.scrollTop=b.scrollHeight;
 }
+
 async function processAll(){
   const key=document.getElementById('apiKey').value.trim();
   if(!key){alert('يرجى إدخال API Key أولاً');return;}
@@ -254,20 +312,16 @@ async function processAll(){
   const total=imgs.length;let done=0,ok=0,err=0;
   for(let i=0;i<total;i++){
     const f=imgs[i];log('['+( i+1)+'/'+total+'] '+f.name,'linf');
-    try{
-      const r=await extract(f);
-      r._rawFile=f; // حفظ الملف الأصلي لإعادة تسميته لاحقاً
-      newRecs.push(r);
-      log('✓ رقم الطلب: '+(r.order_number||'—')+' | الكمية: '+(r.quantity||'—'),'lok');ok++;
-    }
+    try{const r=await extract(f);r._rawFile=f;newRecs.push(r);log('✓ رقم الطلب: '+(r.order_number||'—'),'lok');ok++;}
     catch(e){newRecs.push({_file:f.name,_status:'error',_error:e.message,_isOld:false});log('✗ '+f.name+': '+e.message,'lerr');err++;}
     done++;document.getElementById('bfill').style.width=Math.round(done/total*100)+'%';document.getElementById('pnum').textContent=done+' / '+total;
   }
   const allOk=newRecs.filter(r=>r._status==='success');
-  log('اكتمل! '+ok+' نجاح · '+err+' أخطاء · إجمالي: '+(oldRecs.length+ok),ok===total?'lok':'lwarn');
+  log('اكتمل! '+ok+' نجاح · '+err+' أخطاء',ok===total?'lok':'lwarn');
   showRes(ok,err,allOk);
-  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة '+imgs.length+' صورة مرة أخرى';
+  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة مرة أخرى';
 }
+
 function showRes(ok,err,allOk){
   document.getElementById('stot').textContent=oldRecs.length+allOk.length;
   document.getElementById('snew').textContent=allOk.length;
@@ -284,50 +338,7 @@ function showRes(ok,err,allOk){
   document.getElementById('ressec').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// الدالة الجديدة لتحميل الصور بأسماء أرقام الطلبات
-async function dlImages() {
-  if (typeof JSZip === 'undefined') {
-    alert('جاري تحميل مكتبة ZIP، يرجى المحاولة بعد قليل.');
-    return;
-  }
-  
-  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number && r.order_number.trim() !== '');
-  if (successRecs.length === 0) {
-    alert('لا توجد صور تمت معالجتها بنجاح وتحتوي على رقم طلب للتحميل.');
-    return;
-  }
-
-  const btn = document.getElementById('dlImgBtn');
-  const oldText = btn.innerHTML;
-  btn.innerHTML = '⏳ جاري تجهيز الصور...';
-  btn.disabled = true;
-
-  try {
-    const zip = new JSZip();
-    successRecs.forEach(rec => {
-      // استخراج امتداد الملف الأصلي (مثل jpg, png)
-      const ext = rec._file.split('.').pop();
-      // تنظيف رقم الطلب من أي رموز قد تسبب مشاكل في أسماء الملفات
-      const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
-      zip.file(`${safeName}.${ext}`, rec._rawFile);
-    });
-
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Invoices_Images_${new Date().toISOString().slice(0,10)}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (error) {
-    alert('حدث خطأ أثناء ضغط الصور: ' + error.message);
-  } finally {
-    btn.innerHTML = oldText;
-    btn.disabled = false;
-  }
-}
-
-function dlExcel(){
+function generateExcelWorkbook() {
   const wb=XLSX.utils.book_new();
   const BG='1A0810',WH='FFFFFF',ODD='F9F0F4',EVEN='FFFFFF',WBGC='FFF8E7',WFGC='FFB000',ACC='C4216A';
   const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
@@ -372,20 +383,75 @@ function dlExcel(){
   ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}},{s:{r:1,c:0},e:{r:1,c:4}}];
   ws2['!cols']=[{wch:14},{wch:16},{wch:10},{wch:22},{wch:12}];ws2['!rows']=[{hpt:30},{hpt:24},{hpt:26}];
   XLSX.utils.book_append_sheet(wb,ws2,'SUMMARY');
-  const ins=[['📋','كيفية الاستخدام:'],['',''],
-    ['1','افتح شيت ARCHIVE وأضف كل فاتورة جديدة في صف جديد'],
-    ['2','عمود Month-Year (W) — اكتب مثل: Mar-2026'],
-    ['3','شيت SUMMARY يتحدث تلقائياً بمجرد فتح الملف'],
-    ['4','استخدم التطبيق لاستخراج البيانات وتحميل الملف'],['',''],
-    ['⚠','لا تغيّر أسماء الأعمدة'],['⚠','لا تغيّر أسماء الشيتات'],
-    ['✅','تقدر تضيف صفوف جديدة بحرية'],['✅','تقدر تعدّل أو تصحح بيانات قديمة']];
-  const ws3=XLSX.utils.aoa_to_sheet(ins);
-  ins.forEach((_,ri)=>{const a=XLSX.utils.encode_cell({r:ri,c:0}),b2=XLSX.utils.encode_cell({r:ri,c:1});
-    if(ws3[a])ws3[a].s={font:{bold:true,color:{rgb:ACC},name:'Arial',sz:11}};
-    if(ws3[b2])ws3[b2].s={font:{name:'Arial',sz:10}};});
-  ws3['!cols']=[{wch:6},{wch:55}];
-  XLSX.utils.book_append_sheet(wb,ws3,'تعليمات');
-  XLSX.writeFile(wb,'delivery_archive_'+new Date().toISOString().slice(0,10)+'.xlsx',{cellStyles:true});
+  return wb;
+}
+
+function downloadExcelLocal() {
+  const wb = generateExcelWorkbook();
+  XLSX.writeFile(wb, 'delivery_archive_' + new Date().toISOString().slice(0,10) + '.xlsx', {cellStyles:true});
+}
+
+async function downloadImagesLocal() {
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (!successRecs.length) return alert('لا توجد صور لمعالجتها');
+  const zip = new JSZip();
+  successRecs.forEach(rec => {
+    const ext = rec._file.split('.').pop();
+    const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+    zip.file(`${safeName}.${ext}`, rec._rawFile);
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `Invoices_${new Date().toISOString().slice(0,10)}.zip`;
+  link.click();
+}
+
+// دالة الرفع المباشر لجوجل درايف
+async function uploadAllToDrive() {
+  if (!gDriveToken) return alert('يرجى تسجيل الدخول لحساب جوجل أولاً من خانة الإعدادات فوق.');
+  const folderId = document.getElementById('gFolderId').value.trim();
+  if (!folderId) return alert('يرجى إدخال Folder ID الخاص بمجلدك في Google Drive.');
+
+  const btn = document.getElementById('driveBtn');
+  const oldText = btn.innerHTML;
+  btn.innerHTML = '⏳ جاري الرفع إلى Google Drive... الرجاء الانتظار';
+  btn.disabled = true;
+
+  try {
+    const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+    log('بدء الرفع إلى جوجل درايف...', 'linf');
+
+    // 1. رفع ملف الإكسل
+    const wb = generateExcelWorkbook();
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const excelName = 'Delivery_Archive_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    
+    log('جاري رفع ملف Excel...', 'linf');
+    await uploadFileToDrive(excelBlob, excelName, excelBlob.type, folderId);
+    log('✓ تم رفع Excel بنجاح', 'lok');
+
+    // 2. رفع الصور
+    for (let i = 0; i < successRecs.length; i++) {
+      const rec = successRecs[i];
+      const ext = rec._file.split('.').pop();
+      const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+      const finalName = `${safeName}.${ext}`;
+      
+      log(`جاري رفع الصورة: ${finalName}`, 'linf');
+      await uploadFileToDrive(rec._rawFile, finalName, rec._rawFile.type, folderId);
+    }
+    log('🎉 اكتمل الرفع لجوجل درايف بالكامل!', 'lok');
+    alert('تم رفع ملف الإكسل وجميع الصور بنجاح إلى جوجل درايف!');
+
+  } catch (error) {
+    log('✗ حدث خطأ أثناء الرفع: ' + error.message, 'lerr');
+    alert('حدث خطأ أثناء الرفع: ' + error.message);
+  } finally {
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+  }
 }
 </script>
 </body>
