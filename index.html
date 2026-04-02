@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أرشيف فواتير التسليم - نوبكو</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#0a0f1e;--surface:#111827;--surface2:#1a2235;--border:#1e3a5f;--accent:#0ea5e9;--accent2:#06b6d4;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e2e8f0;--muted:#64748b;--card:#0f1729;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(14,165,233,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.logo{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(14,165,233,.3);flex-shrink:0;}
+.htxt h1{font-size:20px;font-weight:700;}.htxt p{font-size:13px;color:var(--muted);margin-top:2px;}
+.badge{margin-right:auto;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;}
+.ctitle{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:580px){.g2{grid-template-columns:1fr;}}
+.f{display:flex;flex-direction:column;gap:6px;}.f label{font-size:12px;color:var(--muted);font-weight:500;}
+.f input,.f select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;transition:border-color .2s;width:100%;}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1);}
+.istrip{display:flex;align-items:center;gap:14px;border:1px dashed var(--border);border-radius:12px;padding:14px 16px;background:var(--card);cursor:pointer;transition:all .2s;}
+.istrip:hover{border-color:var(--accent);background:rgba(14,165,233,.04);}
+.istrip .ico{font-size:26px;flex-shrink:0;}.istrip .itxt h4{font-size:13px;font-weight:600;margin-bottom:2px;}.istrip .itxt p{font-size:11px;color:var(--muted);}
+.istat{margin-right:auto;font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;}
+.istat.none{background:rgba(100,116,139,.12);color:var(--muted);}.istat.ok{background:rgba(16,185,129,.15);color:var(--green);}
+.ibtn{flex-shrink:0;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:var(--accent);padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.ibtn:hover{background:rgba(14,165,233,.2);}
+.upzone{border:2px dashed var(--border);border-radius:16px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card);margin-bottom:18px;}
+.upzone:hover,.upzone.over{border-color:var(--accent);background:rgba(14,165,233,.05);}
+.upico{font-size:44px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 10px rgba(14,165,233,.4));}
+.upzone h2{font-size:16px;font-weight:600;margin-bottom:5px;}.upzone p{font-size:13px;color:var(--muted);margin-bottom:14px;}
+.ubtn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;padding:10px 22px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.ubtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,165,233,.3);}
+.prev-sec{margin-bottom:18px;display:none;}.prev-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.prev-hdr h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.cbadge{background:var(--accent);color:white;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.clrbtn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s;}
+.clrbtn:hover{border-color:var(--red);color:var(--red);}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;}
+.pitem{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/4;border:1px solid var(--border);background:var(--surface2);}
+.pitem img{width:100%;height:100%;object-fit:cover;}
+.rmbtn{position:absolute;top:4px;left:4px;width:22px;height:22px;background:rgba(239,68,68,.9);border:none;border-radius:50%;color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pname{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:9px;padding:4px 6px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+.pbtn{width:100%;background:linear-gradient(135deg,#0ea5e9,#06b6d4,#10b981);background-size:200%;animation:grd 3s ease infinite;color:white;border:none;padding:16px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+.pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px rgba(14,165,233,.4);}
+.pbtn:disabled{opacity:.5;cursor:not-allowed;animation:none;background:var(--surface2);}
+@keyframes grd{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.progsec{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;display:none;}
+.proghdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.proghdr h3{font-size:14px;font-weight:600;}.prognum{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);}
+.bwrap{background:var(--card);border-radius:20px;height:8px;overflow:hidden;margin-bottom:16px;}
+.bfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--green));background-size:200%;animation:ba 1.5s linear infinite;border-radius:20px;transition:width .4s;width:0%;}
+@keyframes ba{0%{background-position:0%}100%{background-position:200%}}
+.logbox{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:160px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;}
+.lok{color:var(--green);}.lerr{color:var(--red);}.linf{color:var(--accent);}.lwarn{color:var(--yellow);}
+.ressec{display:none;}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.sv{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;display:block;}
+.sl{font-size:11px;color:var(--muted);margin-top:2px;display:block;}
+.sc.tot .sv{color:var(--accent);}.sc.nw .sv{color:var(--green);}.sc.er .sv{color:var(--red);}
+.dlcard{background:var(--surface);border:1px solid rgba(16,185,129,.35);border-radius:14px;padding:18px;margin-bottom:16px;}
+.dlcard h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.btn-group > *{flex:1;min-width:180px;}
+.dlbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.btn-excel{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.btn-img{background:rgba(14,165,233,.1);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
+.btn-excel:hover{background:rgba(16,185,129,.2);}.btn-img:hover{background:rgba(14,165,233,.2);}
+.btn-drive{width:100%;background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px;font-size:15px;box-shadow:0 4px 15px rgba(16,185,129,.3);}
+.btn-drive:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(16,185,129,.4);}
+.btn-drive:disabled{background:var(--surface2);color:var(--muted);box-shadow:none;cursor:not-allowed;}
+.twrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tscroll{overflow-x:auto;max-height:380px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--surface2);padding:10px 12px;text-align:right;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border);white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:10px 12px;border-bottom:1px solid rgba(30,58,95,.5);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04);}
+.rold td{color:var(--muted);}.rnew td{background:rgba(16,185,129,.03);}
+.tnew{background:rgba(16,185,129,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
+.told{background:rgba(100,116,139,.15);color:var(--muted);border-radius:4px;padding:2px 7px;font-size:10px;}
+.sok{color:var(--green);font-weight:600;}.serr{color:var(--red);font-weight:600;}
+</style>
+</head>
+<body>
+
+  <input type="hidden" id="apiKey" value="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"/>
+  <input type="hidden" id="gScriptUrl" value="https://script.google.com/macros/s/AKfycbxlkzPDWfdCBzS5JSloRRTmveEIlkwhRJtiFwhBn5WlnjmASmHo3lTjIg0N1YuZ6Ntf/exec"/>
+  <input type="hidden" id="mdl" value="google/gemini-2.0-flash-001"/>
+  <div class="wrap">
+  <header>
+    <div class="logo">📦</div>
+    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · رفع مباشر وتلقائي إلى الدرايف</p></div>
+  </header>
+  
+  <div class="card">
+    <div class="ctitle">📂 الأرشيف السابق (اختياري)</div>
+    <div class="istrip" onclick="document.getElementById('archiveInput').click()">
+      <div class="ico">📊</div>
+      <div class="itxt"><h4>ارفع ملف Excel الأرشيف السابق</h4><p>تضاف السجلات الجديدة عليه تلقائياً</p></div>
+      <span class="istat none" id="istat">لا يوجد ملف</span>
+    </div>
+    <input type="file" id="archiveInput" accept=".xlsx,.xls,.csv" style="display:none;"/>
+  </div>
+
+  <div class="upzone" id="upzone">
+    <span class="upico">🗂️</span><h2>ارفع صور الفواتير الجديدة</h2>
+    <p>اسحب الصور هنا أو اضغط للاختيار · JPG, PNG, WEBP</p>
+    <button class="ubtn" onclick="document.getElementById('fileInput').click()">📎 اختر الصور</button>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;"/>
+  </div>
+
+  <div class="prev-sec" id="prevSec">
+    <div class="prev-hdr">
+      <h3>الصور المحددة <span class="cbadge" id="cnt">0</span></h3>
+      <button class="clrbtn" onclick="clearImgs()">🗑 مسح الكل</button>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+
+  <button class="pbtn" id="pbtn" disabled onclick="processAll()">
+    <span id="bico">⚡</span><span id="btxt">ارفع صوراً للبدء</span>
+  </button>
+
+  <div class="progsec" id="progsec">
+    <div class="proghdr"><h3>⏳ جاري المعالجة...</h3><span class="prognum" id="pnum">0 / 0</span></div>
+    <div class="bwrap"><div class="bfill" id="bfill"></div></div>
+    <div class="logbox" id="logbox"></div>
+  </div>
+
+  <div class="ressec" id="ressec">
+    <div class="srow">
+      <div class="sc tot"><span class="sv" id="stot">0</span><span class="sl">إجمالي الأرشيف</span></div>
+      <div class="sc nw"><span class="sv" id="snew">0</span><span class="sl">سجلات جديدة</span></div>
+      <div class="sc er"><span class="sv" id="serr">0</span><span class="sl">أخطاء</span></div>
+    </div>
+    <div class="dlcard">
+      <h4>☁️ الحفظ في التخزين السحابي</h4>
+      <div class="btn-group">
+        <button class="dlbtn btn-excel" onclick="downloadExcelLocal()">📊 تحميل محلي (Excel)</button>
+        <button class="dlbtn btn-img" onclick="downloadImagesLocal()">🖼️ تحميل محلي (ZIP)</button>
+      </div>
+      <button class="dlbtn btn-drive" id="driveBtn" onclick="uploadAllToDrive()">🚀 حفظ وإرسال إلى الإدارة (Google Drive)</button>
+    </div>
+    <div class="twrap">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th></th><th>#</th><th>الملف</th><th>رقم الطلب</th><th>تاريخ الطلب</th><th>المستلم</th><th>الكمية</th><th>الشاحنة</th><th>الحالة</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let imgs=[],newRecs=[],oldRecs=[];
+const HDRS=['File Name','Order Number','Order Create Date','Shipment Number','Dispatch Date','Dispatched User','Sender','Consignee','Pharmacy Code','City','Line','Item No','Description','Item Family','Client ID','Quantity','Batch','Expiry Date','Total Quantity','Truck Number','Pallets Count','Processed Date'];
+const KEYS=['_file','order_number','order_create_date','shipment_number','dispatch_date','dispatched_user','sender','consignee','pharmacy_code','city','line','item_no','description','item_family','client_id','quantity','batch','expiry_date','total_quantity','truck_number','pallets_count','_date'];
+const PROMPT='Extract these fields from this Goods Delivery Note image. Return ONLY a JSON object, no markdown:\n{"order_number":"","order_create_date":"","shipment_number":"","dispatch_date":"","dispatched_user":"","sender":"","consignee":"","pharmacy_code":"","city":"","line":"","item_no":"","description":"","item_family":"","client_id":"","quantity":"","batch":"","expiry_date":"","total_quantity":"","truck_number":"","pallets_count":""}\nUse "" for any missing field.';
+
+const uz=document.getElementById('upzone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');addImgs([...e.dataTransfer.files]);});
+document.getElementById('fileInput').addEventListener('change',e=>addImgs([...e.target.files]));
+
+function addImgs(files){imgs=[...imgs,...files.filter(f=>f.type.startsWith('image/'))];render();}
+function render(){
+  const sec=document.getElementById('prevSec'),btn=document.getElementById('pbtn');
+  if(!imgs.length){sec.style.display='none';btn.disabled=true;document.getElementById('btxt').textContent='ارفع صوراً للبدء';return;}
+  sec.style.display='block';document.getElementById('cnt').textContent=imgs.length;
+  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة '+imgs.length+' صورة وإضافتها للأرشيف';
+  const g=document.getElementById('pgrid');g.innerHTML='';
+  imgs.forEach((f,i)=>{const url=URL.createObjectURL(f);const el=document.createElement('div');el.className='pitem';
+    el.innerHTML='<img src="'+url+'"><button class="rmbtn" onclick="rmImg('+i+')">✕</button><div class="pname">'+f.name+'</div>';g.appendChild(el);});
+}
+function rmImg(i){imgs.splice(i,1);render();}
+function clearImgs(){imgs=[];document.getElementById('fileInput').value='';render();}
+
+document.getElementById('archiveInput').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const sheetName=wb.SheetNames.includes('ARCHIVE')?'ARCHIVE':wb.SheetNames[0];
+    const ws=wb.Sheets[sheetName];
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    let hdrRow=-1;
+    raw.forEach((row,i)=>{if(row.includes('File Name'))hdrRow=i;});
+    if(hdrRow===-1){alert('ما أقدر أقرأ الملف');return;}
+    const rows=XLSX.utils.sheet_to_json(ws,{header:raw[hdrRow],defval:'',range:hdrRow});
+    rows.shift();
+    oldRecs=rows.filter(r=>r['File Name']).map(row=>{
+      const r={_isOld:true,_month:row['Month-Year']||''};
+      HDRS.forEach((h,i)=>{r[KEYS[i]]=row[h]||'';});
+      return r;
+    });
+    document.getElementById('istat').textContent='✓ '+oldRecs.length+' سجل';
+    document.getElementById('istat').className='istat ok';
+    log('استيراد الأرشيف: '+oldRecs.length+' سجل قديم','lok');
+  }catch(err){alert('خطأ: '+err.message);}
+});
+
+function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+
+async function extract(file){
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('mdl').value;
+  if(!key)throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
+  const b=await b64(file);
+  const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':location.href,'X-Title':'NUPCO Invoice Archiver'},
+    body:JSON.stringify({model,max_tokens:1000,messages:[{role:'user',content:[
+      {type:'image_url',image_url:{url:'data:'+(file.type||'image/jpeg')+';base64,'+b}},
+      {type:'text',text:PROMPT}]}]})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+res.status);}
+  const data=await res.json();
+  let txt=data.choices?.[0]?.message?.content||'{}';
+  txt=txt.replace(/```json\s*|\s*```/g,'').trim();
+  const p=JSON.parse(txt);
+  const now=new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  p._file=file.name;p._date=now.toLocaleDateString('en-GB');
+  p._month=months[now.getMonth()]+'-'+now.getFullYear();
+  p._status='success';p._isOld=false;
+  return p;
+}
+
+function log(msg,cls){
+  const b=document.getElementById('logbox');const el=document.createElement('div');el.className=cls||'linf';
+  el.textContent='['+new Date().toLocaleTimeString('ar-SA')+'] '+msg;b.appendChild(el);b.scrollTop=b.scrollHeight;
+}
+
+async function processAll(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('الرقم السري غير موجود. تأكد من إعدادات الملف من قبل الإدارة.');return;}
+  if(!imgs.length)return;
+  newRecs=[];
+  const btn=document.getElementById('pbtn');btn.disabled=true;document.getElementById('btxt').textContent='جاري المعالجة...';
+  document.getElementById('progsec').style.display='block';document.getElementById('ressec').style.display='none';
+  document.getElementById('logbox').innerHTML='';
+  if(oldRecs.length)log('الأرشيف: '+oldRecs.length+' سجل قديم','linf');
+  log('بدء معالجة '+imgs.length+' صورة...','linf');
+  const total=imgs.length;let done=0,ok=0,err=0;
+  for(let i=0;i<total;i++){
+    const f=imgs[i];log('['+( i+1)+'/'+total+'] '+f.name,'linf');
+    try{const r=await extract(f);r._rawFile=f;newRecs.push(r);log('✓ رقم الطلب: '+(r.order_number||'—'),'lok');ok++;}
+    catch(e){newRecs.push({_file:f.name,_status:'error',_error:e.message,_isOld:false});log('✗ '+f.name+': '+e.message,'lerr');err++;}
+    done++;document.getElementById('bfill').style.width=Math.round(done/total*100)+'%';document.getElementById('pnum').textContent=done+' / '+total;
+  }
+  const allOk=newRecs.filter(r=>r._status==='success');
+  log('اكتمل! '+ok+' نجاح · '+err+' أخطاء',ok===total?'lok':'lwarn');
+  showRes(ok,err,allOk);
+  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة مرة أخرى';
+}
+
+function showRes(ok,err,allOk){
+  document.getElementById('stot').textContent=oldRecs.length+allOk.length;
+  document.getElementById('snew').textContent=allOk.length;
+  document.getElementById('serr').textContent=err;
+  const tb=document.getElementById('tbody');tb.innerHTML='';
+  [...oldRecs,...newRecs].forEach((d,i)=>{
+    const tr=document.createElement('tr');tr.className=d._isOld?'rold':'rnew';
+    const tag=d._isOld?'<span class="told">قديم</span>':'<span class="tnew">جديد ✦</span>';
+    const st=d._status==='error'?'<span class="serr">✗ خطأ</span>':'<span class="sok">✓</span>';
+    tr.innerHTML='<td>'+tag+'</td><td style="color:var(--muted);">'+(i+1)+'</td><td>'+(d._file||'—').substring(0,22)+'</td><td><strong>'+(d.order_number||'—')+'</strong></td><td>'+(d.order_create_date||'—')+'</td><td>'+(d.consignee||'—')+'</td><td><strong>'+(d.quantity||'—')+'</strong></td><td>'+(d.truck_number||'—')+'</td><td>'+st+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('ressec').style.display='block';
+  document.getElementById('ressec').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function generateExcelWorkbook() {
+  const wb=XLSX.utils.book_new();
+  const BG='1A0810',WH='FFFFFF',ODD='F9F0F4',EVEN='FFFFFF',WBGC='FFF8E7',WFGC='FFB000',ACC='C4216A';
+  const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
+  function cs(v,bold,fg,bg,hz,sz){return{v:v==null?'':v,t:typeof v==='number'?'n':'s',s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Arial',sz:sz||10},fill:{patternType:'solid',fgColor:{rgb:bg||WH}},alignment:{horizontal:hz||'center',vertical:'center',wrapText:true},border:bdr}};}
+  const ALL_HDRS=[...HDRS,'Month-Year'];
+  const ALL_KEYS=[...KEYS,'_month'];
+  const CW=[28,16,16,16,14,14,26,26,12,12,8,18,40,14,14,10,14,12,12,12,12,18,12];
+  const LEFT=[6,7,12];
+  const allData=[...oldRecs,...newRecs.filter(d=>d._status==='success')];
+  const wsData=[];
+  const t1=[cs('🚚 Delivery Archive — NUPCO Madinah | أرشيف فواتير التسليم',true,WH,BG,'center',13)];
+  for(let i=1;i<23;i++)t1.push(cs('',false,WH,BG));wsData.push(t1);
+  const t2=[cs('⚠ أضف كل فاتورة جديدة في صف جديد — لا تحذف الصفوف القديمة | Add each new invoice as a new row only',false,WFGC,WBGC,'center',10)];
+  for(let i=1;i<23;i++)t2.push(cs('',false,WFGC,WBGC));wsData.push(t2);
+  wsData.push(ALL_HDRS.map(h=>cs(h,true,WH,BG,'center',10)));
+  allData.forEach((d,idx)=>{
+    const bg=idx%2===0?ODD:EVEN;
+    wsData.push(ALL_KEYS.map((k,ci)=>cs(d[k]||'',false,'000000',bg,LEFT.includes(ci)?'left':'center',10)));
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData.map(r=>r.map(c=>c.v)));
+  wsData.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws[a])ws[a].s=cell.s;}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:22}},{s:{r:1,c:0},e:{r:1,c:22}}];
+  ws['!cols']=CW.map(w=>({wch:w}));ws['!rows']=[{hpt:32},{hpt:20},{hpt:28}];
+  XLSX.utils.book_append_sheet(wb,ws,'ARCHIVE');
+  const monthMap={};
+  allData.forEach(d=>{const m=d._month||'Unknown';if(!monthMap[m])monthMap[m]={orders:new Set(),rows:0,consignees:{}};
+    if(d.order_number)monthMap[m].orders.add(d.order_number);monthMap[m].rows++;
+    const c2=d.consignee||'';if(c2)monthMap[m].consignees[c2]=(monthMap[m].consignees[c2]||0)+1;});
+  const sumRows=[];
+  const s1=[cs('📊 ملخص التوزيع — يتحدث تلقائياً من ARCHIVE',true,WH,BG,'center',12)];
+  for(let i=1;i<5;i++)s1.push(cs('',false,WH,BG));sumRows.push(s1);
+  const s2=[cs('الملخص الشهري | Monthly Summary',true,ACC,'F5E6ED','center',11)];
+  for(let i=1;i<5;i++)s2.push(cs('',false,ACC,'F5E6ED'));sumRows.push(s2);
+  sumRows.push(['الشهر','طلبات فريدة','صفوف','أبرز جهة','الحالة'].map(h=>cs(h,true,WH,BG,'center',10)));
+  Object.entries(monthMap).forEach(([m,v],i)=>{
+    const bg=i%2===0?ODD:EVEN;
+    const topC=Object.entries(v.consignees).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+    sumRows.push([m,v.orders.size,v.rows,topC,'نشط'].map((val,ci)=>cs(val,ci===1,'000000',bg,'center',10)));
+  });
+  const ws2=XLSX.utils.aoa_to_sheet(sumRows.map(r=>r.map(c=>c.v)));
+  sumRows.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws2[a])ws2[a].s=cell.s;}));
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}},{s:{r:1,c:0},e:{r:1,c:4}}];
+  ws2['!cols']=[{wch:14},{wch:16},{wch:10},{wch:22},{wch:12}];ws2['!rows']=[{hpt:30},{hpt:24},{hpt:26}];
+  XLSX.utils.book_append_sheet(wb,ws2,'SUMMARY');
+  return wb;
+}
+
+function downloadExcelLocal() {
+  const wb = generateExcelWorkbook();
+  XLSX.writeFile(wb, 'delivery_archive_' + new Date().toISOString().slice(0,10) + '.xlsx', {cellStyles:true});
+}
+
+async function downloadImagesLocal() {
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (!successRecs.length) return alert('لا توجد صور لمعالجتها');
+  const zip = new JSZip();
+  successRecs.forEach(rec => {
+    const ext = rec._file.split('.').pop();
+    const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+    zip.file(`${safeName}.${ext}`, rec._rawFile);
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `Invoices_${new Date().toISOString().slice(0,10)}.zip`;
+  link.click();
+}
+
+async function uploadToAppsScript(base64Data, fileName, mimeType, scriptUrl) {
+  const payload = { base64: base64Data, fileName: fileName, mimeType: mimeType };
+  const res = await fetch(scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+async function uploadAllToDrive() {
+  const scriptUrl = document.getElementById('gScriptUrl').value.trim();
+  if (!scriptUrl) return alert('رابط الإرسال غير متوفر، يرجى مراجعة الإدارة.');
+
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (successRecs.length === 0 && oldRecs.length === 0) return alert('لا توجد فواتير للرفع!');
+
+  const btn = document.getElementById('driveBtn');
+  const oldText = btn.innerHTML;
+  btn.innerHTML = '⏳ جاري الإرسال للدرايف... يرجى الانتظار';
+  btn.disabled = true;
+
+  try {
+    log('بدء الرفع المباشر...', 'linf');
+
+    const wb = generateExcelWorkbook();
+    const excelBase64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+    const excelName = 'Archive_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    
+    log('جاري رفع ملف Excel...', 'linf');
+    await uploadToAppsScript(excelBase64, excelName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', scriptUrl);
+    log('✓ تم رفع Excel بنجاح', 'lok');
+
+    for (let i = 0; i < successRecs.length; i++) {
+      const rec = successRecs[i];
+      const ext = rec._file.split('.').pop();
+      const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+      const finalName = `${safeName}.${ext}`;
+      
+      const imgBase64 = await b64(rec._rawFile);
+      log(`جاري رفع الصورة: ${finalName}`, 'linf');
+      await uploadToAppsScript(imgBase64, finalName, rec._rawFile.type, scriptUrl);
+    }
+
+    log('🎉 اكتمل الرفع إلى المجلد المشترك بنجاح!', 'lok');
+    alert('تم إرسال الأرشيف والصور إلى الإدارة بنجاح!');
+
+  } catch (error) {
+    log('✗ حدث خطأ أثناء الرفع: ' + error.message, 'lerr');
+    alert('حدث خطأ أثناء الرفع، التأكد من اتصال الإنترنت.');
+  } finally {
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
