@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أرشيف فواتير التسليم - نوبكو</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#0a0f1e;--surface:#111827;--surface2:#1a2235;--border:#1e3a5f;--accent:#0ea5e9;--accent2:#06b6d4;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;--text:#e2e8f0;--muted:#64748b;--card:#0f1729;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(14,165,233,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px;position:relative;z-index:1;}
+header{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.logo{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(14,165,233,.3);flex-shrink:0;}
+.htxt h1{font-size:20px;font-weight:700;}.htxt p{font-size:13px;color:var(--muted);margin-top:2px;}
+.badge{margin-right:auto;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;}
+.ctitle{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:580px){.g2{grid-template-columns:1fr;}}
+.f{display:flex;flex-direction:column;gap:6px;}.f label{font-size:12px;color:var(--muted);font-weight:500;}
+.f input,.f select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;transition:border-color .2s;width:100%;}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,165,233,.1);}
+.istrip{display:flex;align-items:center;gap:14px;border:1px dashed var(--border);border-radius:12px;padding:14px 16px;background:var(--card);cursor:pointer;transition:all .2s;}
+.istrip:hover{border-color:var(--accent);background:rgba(14,165,233,.04);}
+.istrip .ico{font-size:26px;flex-shrink:0;}.istrip .itxt h4{font-size:13px;font-weight:600;margin-bottom:2px;}.istrip .itxt p{font-size:11px;color:var(--muted);}
+.istat{margin-right:auto;font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;}
+.istat.none{background:rgba(100,116,139,.12);color:var(--muted);}.istat.ok{background:rgba(16,185,129,.15);color:var(--green);}
+.ibtn{flex-shrink:0;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:var(--accent);padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.ibtn:hover{background:rgba(14,165,233,.2);}
+.upzone{border:2px dashed var(--border);border-radius:16px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card);margin-bottom:18px;}
+.upzone:hover,.upzone.over{border-color:var(--accent);background:rgba(14,165,233,.05);}
+.upico{font-size:44px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 10px rgba(14,165,233,.4));}
+.upzone h2{font-size:16px;font-weight:600;margin-bottom:5px;}.upzone p{font-size:13px;color:var(--muted);margin-bottom:14px;}
+.ubtn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;padding:10px 22px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.ubtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(14,165,233,.3);}
+.prev-sec{margin-bottom:18px;display:none;}.prev-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.prev-hdr h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.cbadge{background:var(--accent);color:white;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.clrbtn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s;}
+.clrbtn:hover{border-color:var(--red);color:var(--red);}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;}
+.pitem{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:3/4;border:1px solid var(--border);background:var(--surface2);}
+.pitem img{width:100%;height:100%;object-fit:cover;}
+.rmbtn{position:absolute;top:4px;left:4px;width:22px;height:22px;background:rgba(239,68,68,.9);border:none;border-radius:50%;color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pname{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:9px;padding:4px 6px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+.pbtn{width:100%;background:linear-gradient(135deg,#0ea5e9,#06b6d4,#10b981);background-size:200%;animation:grd 3s ease infinite;color:white;border:none;padding:16px;border-radius:12px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+.pbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 30px rgba(14,165,233,.4);}
+.pbtn:disabled{opacity:.5;cursor:not-allowed;animation:none;background:var(--surface2);}
+@keyframes grd{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.progsec{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;display:none;}
+.proghdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.proghdr h3{font-size:14px;font-weight:600;}.prognum{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);}
+.bwrap{background:var(--card);border-radius:20px;height:8px;overflow:hidden;margin-bottom:16px;}
+.bfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--green));background-size:200%;animation:ba 1.5s linear infinite;border-radius:20px;transition:width .4s;width:0%;}
+@keyframes ba{0%{background-position:0%}100%{background-position:200%}}
+.logbox{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:160px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;}
+.lok{color:var(--green);}.lerr{color:var(--red);}.linf{color:var(--accent);}.lwarn{color:var(--yellow);}
+.ressec{display:none;}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.sv{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;display:block;}
+.sl{font-size:11px;color:var(--muted);margin-top:2px;display:block;}
+.sc.tot .sv{color:var(--accent);}.sc.nw .sv{color:var(--green);}.sc.er .sv{color:var(--red);}
+.dlcard{background:var(--surface);border:1px solid rgba(16,185,129,.35);border-radius:14px;padding:18px;margin-bottom:16px;}
+.dlcard h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.btn-group > *{flex:1;min-width:180px;}
+.dlbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;border:none;}
+.btn-excel{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.btn-img{background:rgba(14,165,233,.1);color:var(--accent);border:1px solid rgba(14,165,233,.3);}
+.btn-excel:hover{background:rgba(16,185,129,.2);}.btn-img:hover{background:rgba(14,165,233,.2);}
+.btn-drive{width:100%;background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px;font-size:15px;box-shadow:0 4px 15px rgba(16,185,129,.3);}
+.btn-drive:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(16,185,129,.4);}
+.btn-drive:disabled{background:var(--surface2);color:var(--muted);box-shadow:none;cursor:not-allowed;}
+.twrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tscroll{overflow-x:auto;max-height:380px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--surface2);padding:10px 12px;text-align:right;font-weight:600;color:var(--accent);border-bottom:1px solid var(--border);white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:10px 12px;border-bottom:1px solid rgba(30,58,95,.5);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04);}
+.rold td{color:var(--muted);}.rnew td{background:rgba(16,185,129,.03);}
+.tnew{background:rgba(16,185,129,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
+.told{background:rgba(100,116,139,.15);color:var(--muted);border-radius:4px;padding:2px 7px;font-size:10px;}
+.sok{color:var(--green);font-weight:600;}.serr{color:var(--red);font-weight:600;}
+
+/* ── Compare Section ── */
+.cmp-sec{margin-top:32px;border-top:1px solid var(--border);padding-top:28px;}
+.cmp-title{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.cmp-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.cmp-uploads{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:640px){.cmp-uploads{grid-template-columns:1fr;}}
+.cmp-slot{background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;display:block;}
+.cmp-slot:hover{border-color:var(--accent);background:rgba(14,165,233,.04);}
+.cmp-slot.loaded{border-color:var(--green);border-style:solid;background:rgba(16,185,129,.04);}
+.cmp-slot .slot-ico{font-size:32px;margin-bottom:8px;display:block;}
+.cmp-slot .slot-lbl{font-size:13px;font-weight:700;margin-bottom:4px;}
+.cmp-slot .slot-sub{font-size:11px;color:var(--muted);}
+.cmp-slot .slot-count{position:absolute;top:10px;left:10px;background:var(--green);color:white;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;display:none;}
+.cmp-slot.loaded .slot-count{display:block;}
+.cmp-slot .slot-clr{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;display:none;}
+.cmp-slot.loaded .slot-clr{display:block;}
+.cmp-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;border:none;padding:14px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;}
+.cmp-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 28px rgba(124,58,237,.35);}
+.cmp-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--surface2);}
+.cmp-res{display:none;}
+/* KPI row */
+.cmp-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.cmp-kcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+.cmp-kcard .ck-ico{font-size:22px;margin-bottom:6px;display:block;}
+.cmp-kcard .ck-name{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.cmp-kcard .ck-val{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;display:block;}
+.cmp-kcard .ck-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.ck-arch .ck-val{color:#f59e0b;}
+.ck-ula  .ck-val{color:#0ea5e9;}
+.ck-mad  .ck-val{color:#10b981;}
+/* Venn-like summary */
+.cmp-venn{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+@media(max-width:580px){.cmp-venn{grid-template-columns:1fr;}}
+.vbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.vbox h4{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.vbox ul{list-style:none;padding:0;}
+.vbox ul li{font-size:11px;padding:3px 0;border-bottom:1px solid rgba(30,58,95,.3);color:var(--text);font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;align-items:center;}
+.vbox ul li:last-child{border-bottom:none;}
+.vbox ul li .ord{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
+.vtag{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;white-space:nowrap;margin-right:4px;}
+.vtag.a{background:rgba(245,158,11,.2);color:#f59e0b;}
+.vtag.u{background:rgba(14,165,233,.2);color:#0ea5e9;}
+.vtag.m{background:rgba(16,185,129,.2);color:#10b981;}
+.vbox .empty{font-size:12px;color:var(--muted);text-align:center;padding:12px 0;}
+/* Overlap table */
+.ov-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px;}
+.ov-table-title{padding:12px 16px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ov-scroll{overflow-x:auto;max-height:340px;overflow-y:auto;}
+.ov-scroll table th{background:var(--surface2);padding:8px 12px;font-size:10px;}
+.ov-scroll table td{padding:8px 12px;font-size:11px;font-family:'JetBrains Mono',monospace;}
+.chk{font-size:14px;}
+.chk.yes{color:var(--green);}.chk.no{color:var(--red);}
+.dl-cmp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:10px;border:none;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#a78bfa;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.dl-cmp-btn:hover{background:rgba(124,58,237,.25);}
+.flt-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.flt-btn:hover{border-color:var(--accent);color:var(--accent);}
+.flt-btn.active{background:rgba(14,165,233,.15);border-color:var(--accent);color:var(--accent);}
+</style>
+</head>
+<body>
+
+  <input type="hidden" id="apiKey" value="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"/>
+  <input type="hidden" id="gScriptUrl" value="https://script.google.com/macros/s/AKfycbxlkzPDWfdCBzS5JSloRRTmveEIlkwhRJtiFwhBn5WlnjmASmHo3lTjIg0N1YuZ6Ntf/exec"/>
+  <input type="hidden" id="mdl" value="google/gemini-2.0-flash-001"/>
+  <div class="wrap">
+  <header>
+    <div class="logo">📦</div>
+    <div class="htxt"><h1>أرشيف فواتير التسليم</h1><p>نوبكو المدينة المنورة · رفع مباشر وتلقائي إلى الدرايف</p></div>
+  </header>
+  
+  <div class="card">
+    <div class="ctitle">📂 الأرشيف السابق (اختياري)</div>
+    <div class="istrip" onclick="document.getElementById('archiveInput').click()">
+      <div class="ico">📊</div>
+      <div class="itxt"><h4>ارفع ملف Excel الأرشيف السابق</h4><p>تضاف السجلات الجديدة عليه تلقائياً</p></div>
+      <span class="istat none" id="istat">لا يوجد ملف</span>
+    </div>
+    <input type="file" id="archiveInput" accept=".xlsx,.xls,.csv" style="display:none;"/>
+  </div>
+
+  <div class="upzone" id="upzone">
+    <span class="upico">🗂️</span><h2>ارفع صور الفواتير الجديدة</h2>
+    <p>اسحب الصور هنا أو اضغط للاختيار · JPG, PNG, WEBP</p>
+    <button class="ubtn" onclick="document.getElementById('fileInput').click()">📎 اختر الصور</button>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;"/>
+  </div>
+
+  <div class="prev-sec" id="prevSec">
+    <div class="prev-hdr">
+      <h3>الصور المحددة <span class="cbadge" id="cnt">0</span></h3>
+      <button class="clrbtn" onclick="clearImgs()">🗑 مسح الكل</button>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+
+  <button class="pbtn" id="pbtn" disabled onclick="processAll()">
+    <span id="bico">⚡</span><span id="btxt">ارفع صوراً للبدء</span>
+  </button>
+
+  <div class="progsec" id="progsec">
+    <div class="proghdr"><h3>⏳ جاري المعالجة...</h3><span class="prognum" id="pnum">0 / 0</span></div>
+    <div class="bwrap"><div class="bfill" id="bfill"></div></div>
+    <div class="logbox" id="logbox"></div>
+  </div>
+
+  <div class="ressec" id="ressec">
+    <div class="srow">
+      <div class="sc tot"><span class="sv" id="stot">0</span><span class="sl">إجمالي الأرشيف</span></div>
+      <div class="sc nw"><span class="sv" id="snew">0</span><span class="sl">سجلات جديدة</span></div>
+      <div class="sc er"><span class="sv" id="serr">0</span><span class="sl">أخطاء</span></div>
+    </div>
+    <div class="dlcard">
+      <h4>☁️ الحفظ في التخزين السحابي</h4>
+      <div class="btn-group">
+        <button class="dlbtn btn-excel" onclick="downloadExcelLocal()">📊 تحميل محلي (Excel)</button>
+        <button class="dlbtn btn-img" onclick="downloadImagesLocal()">🖼️ تحميل محلي (ZIP)</button>
+      </div>
+      <button class="dlbtn btn-drive" id="driveBtn" onclick="uploadAllToDrive()">🚀 حفظ وإرسال إلى الإدارة (Google Drive)</button>
+    </div>
+    <div class="twrap">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th></th><th>#</th><th>الملف</th><th>رقم الطلب</th><th>تاريخ الطلب</th><th>المستلم</th><th>الكمية</th><th>الشاحنة</th><th>الحالة</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     قسم مقارنة الملفات
+══════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="cmp-sec">
+    <div class="cmp-title">⚖️ مقارنة الأرشيف بين الفروع</div>
+    <div class="cmp-sub">ارفع ثلاثة ملفات Excel ليقارن بينهم حسب رقم الأوردر — من عنده ومن ماعنده</div>
+
+    <div class="cmp-uploads">
+      <!-- الأرشيف الرئيسي -->
+      <label class="cmp-slot" id="slot-arch">
+        <input type="file" id="fi-arch" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('arch',this)"/>
+        <span class="slot-count" id="count-arch">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();clearSlot('arch')">✕</button>
+        <span class="slot-ico">📦</span>
+        <div class="slot-lbl" style="color:#f59e0b;">ملف الأرشيف</div>
+        <div class="slot-sub" id="name-arch">اضغط لاختيار الملف</div>
+      </label>
+      <!-- العلا -->
+      <label class="cmp-slot" id="slot-ula">
+        <input type="file" id="fi-ula" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('ula',this)"/>
+        <span class="slot-count" id="count-ula">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();clearSlot('ula')">✕</button>
+        <span class="slot-ico">🏜️</span>
+        <div class="slot-lbl" style="color:#0ea5e9;">ملف العلا</div>
+        <div class="slot-sub" id="name-ula">اضغط لاختيار الملف</div>
+      </label>
+      <!-- المدينة -->
+      <label class="cmp-slot" id="slot-mad">
+        <input type="file" id="fi-mad" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('mad',this)"/>
+        <span class="slot-count" id="count-mad">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();clearSlot('mad')">✕</button>
+        <span class="slot-ico">🕌</span>
+        <div class="slot-lbl" style="color:#10b981;">ملف المدينة</div>
+        <div class="slot-sub" id="name-mad">اضغط لاختيار الملف</div>
+      </label>
+    </div>
+
+    <button class="cmp-btn" id="cmpBtn" disabled onclick="runCompare()">
+      ⚖️ قارن الآن
+    </button>
+
+    <!-- Results -->
+    <div class="cmp-res" id="cmpRes">
+
+      <!-- KPI cards -->
+      <div class="cmp-kpi">
+        <div class="cmp-kcard ck-arch">
+          <span class="ck-ico">📦</span>
+          <div class="ck-name">الأرشيف</div>
+          <span class="ck-val" id="kv-arch">0</span>
+          <div class="ck-sub">أوردر فريد</div>
+        </div>
+        <div class="cmp-kcard ck-ula">
+          <span class="ck-ico">🏜️</span>
+          <div class="ck-name">العلا</div>
+          <span class="ck-val" id="kv-ula">0</span>
+          <div class="ck-sub">أوردر فريد</div>
+        </div>
+        <div class="cmp-kcard ck-mad">
+          <span class="ck-ico">🕌</span>
+          <div class="ck-name">المدينة</div>
+          <span class="ck-val" id="kv-mad">0</span>
+          <div class="ck-sub">أوردر فريد</div>
+        </div>
+      </div>
+
+      <!-- Unique per file -->
+      <div class="cmp-venn">
+        <div class="vbox">
+          <h4><span style="color:#f59e0b">●</span> موجود في الأرشيف فقط</h4>
+          <ul id="only-arch"></ul>
+        </div>
+        <div class="vbox">
+          <h4><span style="color:#0ea5e9">●</span> موجود في العلا فقط</h4>
+          <ul id="only-ula"></ul>
+        </div>
+        <div class="vbox">
+          <h4><span style="color:#10b981">●</span> موجود في المدينة فقط</h4>
+          <ul id="only-mad"></ul>
+        </div>
+      </div>
+
+      <!-- Full overlap table -->
+      <div class="ov-table-wrap">
+        <div class="ov-table-title" id="cmpTableTitle">📋 جدول مقارنة كامل — كل الأوردرات</div>
+        <!-- Filter buttons -->
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);margin-left:4px">عرض:</span>
+          <button class="flt-btn active" data-f="all"  onclick="renderTable('all')">الكل</button>
+          <button class="flt-btn"        data-f="ok"   onclick="renderTable('ok')">موجود في الكل ✓</button>
+          <button class="flt-btn"        data-f="miss" onclick="renderTable('miss')">غير موجود في الأرشيف ⚠</button>
+          <button class="flt-btn"        data-f="arch" onclick="renderTable('arch')">في الأرشيف فقط</button>
+          <span id="tableCount" style="margin-right:auto;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace"></span>
+        </div>
+        <div class="ov-scroll">
+          <table id="cmpTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>رقم الأوردر</th>
+                <th style="color:#f59e0b">📦 الأرشيف</th>
+                <th style="color:#0ea5e9">🏜️ العلا</th>
+                <th style="color:#10b981">🕌 المدينة</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="cmpBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <button class="dl-cmp-btn" onclick="downloadCompareExcel()">
+        📥 تحميل تقرير المقارنة Excel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     قسم دمج ملفات الأرشيف
+══════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
+    <div class="cmp-title">🗂️ دمج ملفات الأرشيف</div>
+    <div class="cmp-sub">ارفع عدة ملفات Excel أرشيف وادمجهم في ملف واحد — يحذف التكرار برقم الأوردر تلقائياً</div>
+
+    <!-- Drop zone للملفات -->
+    <label class="merge-drop" id="mergeDrop">
+      <input type="file" id="mergeInput" accept=".xlsx,.xls,.csv" multiple style="display:none" onchange="addMergeFiles(this)"/>
+      <span style="font-size:36px;display:block;margin-bottom:10px;filter:drop-shadow(0 0 8px rgba(14,165,233,.4))">📂</span>
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">اسحب ملفات الأرشيف هنا أو اضغط للاختيار</div>
+      <div style="font-size:12px;color:var(--muted)">xlsx · xls · csv · عدة ملفات مع بعض</div>
+    </label>
+
+    <!-- قائمة الملفات المضافة -->
+    <div id="mergeFileList" style="display:none;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:13px;font-weight:600;">الملفات المضافة <span id="mergeCount" style="background:var(--accent);color:white;border-radius:12px;padding:1px 8px;font-size:11px;font-family:'JetBrains Mono',monospace">0</span></span>
+        <button onclick="clearMergeFiles()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-family:inherit;font-size:11px;cursor:pointer;">🗑 مسح الكل</button>
+      </div>
+      <div id="mergeFileItems" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <!-- خيارات -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+        <input type="checkbox" id="mergeDedupe" checked style="width:16px;height:16px;accent-color:var(--accent)"/>
+        حذف الأوردرات المكررة
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+        <input type="checkbox" id="mergeKeepFirst" checked style="width:16px;height:16px;accent-color:var(--accent)"/>
+        عند التكرار احتفظ بالأول
+      </label>
+    </div>
+
+    <button class="cmp-btn" id="mergeBtn" disabled onclick="runMerge()" style="background:linear-gradient(135deg,#0ea5e9,#10b981);">
+      🗂️ دمج الملفات الآن
+    </button>
+
+    <!-- نتيجة الدمج -->
+    <div id="mergeRes" style="display:none;">
+      <div class="srow" style="margin-bottom:16px;">
+        <div class="sc tot"><span class="sv" id="mTotal">0</span><span class="sl">إجمالي السجلات</span></div>
+        <div class="sc nw"><span class="sv" id="mUniq">0</span><span class="sl">بعد حذف المكرر</span></div>
+        <div class="sc er"><span class="sv" id="mDup">0</span><span class="sl">سجلات محذوفة</span></div>
+      </div>
+      <button class="dlbtn btn-drive" onclick="downloadMerged()" style="width:100%;background:linear-gradient(135deg,#10b981,#059669);color:white;padding:14px;font-size:15px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-weight:700;">
+        📊 تحميل الأرشيف المدموج
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.merge-drop{display:block;border:2px dashed var(--border);border-radius:14px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .3s;background:var(--card);margin-bottom:16px;}
+.merge-drop:hover{border-color:var(--accent);background:rgba(14,165,233,.05);}
+.merge-file-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;}
+.merge-file-item .mf-ico{font-size:20px;flex-shrink:0;}
+.merge-file-item .mf-info{flex:1;min-width:0;}
+.merge-file-item .mf-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.merge-file-item .mf-count{font-size:11px;color:var(--muted);margin-top:2px;}
+.merge-file-item .mf-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;}
+.merge-file-item .mf-rm:hover{color:var(--red);}
+.merge-file-item .mf-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
+</style>
+
+<!-- ══════════════════════════════════════════════
+     قسم التحقق من حالة الأوردرات
+══════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
+    <div class="cmp-title">🔍 التحقق من حالة الأوردرات</div>
+    <div class="cmp-sub">ارفع ملف المدينة (أو أي ملف مرجعي) وملف LC — يبحث عن كل أوردر ويحدد حالته تلقائياً</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <!-- ملف المدينة -->
+      <label class="cmp-slot" id="slot-ref" style="border-color:rgba(139,92,246,.4);">
+        <input type="file" id="fi-ref" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadRefFile(this)"/>
+        <span class="slot-count" id="count-ref" style="background:#8b5cf6;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();clearRef()">✕</button>
+        <span class="slot-ico">🗄️</span>
+        <div class="slot-lbl" style="color:#a78bfa;">ملف المرجع (المدينة)</div>
+        <div class="slot-sub" id="name-ref">ملف به حالات الأوردرات</div>
+      </label>
+      <!-- ملف LC -->
+      <label class="cmp-slot" id="slot-lc" style="border-color:rgba(245,158,11,.4);">
+        <input type="file" id="fi-lc" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadLcFile(this)"/>
+        <span class="slot-count" id="count-lc" style="background:#f59e0b;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();clearLc()">✕</button>
+        <span class="slot-ico">📋</span>
+        <div class="slot-lbl" style="color:#fbbf24;">ملف LC Orders</div>
+        <div class="slot-sub" id="name-lc">ملف الأوردرات المراد تتبعها</div>
+      </label>
+    </div>
+
+    <!-- أو اكتب أرقام يدوي -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;">✏️ أو اكتب أرقام الأوردرات يدوياً (سطر لكل رقم)</div>
+      <textarea id="manualOrders" placeholder="095-690-564&#10;095-694-240&#10;095-784-663" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;min-height:90px;"></textarea>
+    </div>
+
+    <button class="cmp-btn" id="chkBtn" disabled onclick="runStatusCheck()" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+      🔍 ابحث عن الحالات
+    </button>
+
+    <!-- النتائج -->
+    <div id="chkRes" style="display:none;">
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;" id="chk-grid">
+        <div class="sc" style="border-color:rgba(16,185,129,.3)"><span class="sv" id="chk-delivered" style="color:var(--green)">0</span><span class="sl">Delivered ✓</span></div>
+        <div class="sc" style="border-color:rgba(14,165,233,.3)"><span class="sv" id="chk-arrived" style="color:var(--accent)">0</span><span class="sl">Arrived 🚛</span></div>
+        <div class="sc" style="border-color:rgba(239,68,68,.3)"><span class="sv" id="chk-notfound" style="color:var(--red)">0</span><span class="sl">غير موجود ✗</span></div>
+        <div class="sc" style="border-color:rgba(245,158,11,.3)"><span class="sv" id="chk-other" style="color:var(--yellow)">0</span><span class="sl">حالة أخرى</span></div>
+      </div>
+
+      <!-- Table -->
+      <div class="ov-table-wrap" style="margin-bottom:16px;">
+        <div style="padding:12px 16px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+          🔍 نتيجة البحث
+          <span id="chk-total-lbl" style="font-size:11px;color:var(--muted);font-weight:400;margin-right:auto;"></span>
+          <!-- Filter -->
+          <select id="chkFilter" onchange="filterChkTable()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text);font-family:inherit;font-size:11px;cursor:pointer;">
+            <option value="all">الكل</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Arrived">Arrived</option>
+            <option value="not_found">غير موجود</option>
+            <option value="other">حالة أخرى</option>
+          </select>
+        </div>
+        <div class="ov-scroll">
+          <table>
+            <thead><tr>
+              <th>#</th>
+              <th>رقم الأوردر</th>
+              <th>Order Type</th>
+              <th>الحالة في المدينة</th>
+              <th>Receive Date</th>
+              <th>Delivered Date</th>
+              <th>Department</th>
+              <th>OTP</th>
+            </tr></thead>
+            <tbody id="chkBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Download LC format -->
+      <button class="dlbtn btn-drive" onclick="downloadLcFormat()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:14px;font-size:15px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;">
+        📥 تحميل بصيغة ملف LC Orders (مع الحالات)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     قسم توليد SUMMARY NUPCO
+══════════════════════════════════════════════ -->
+<div class="wrap">
+  <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
+    <div class="cmp-title">📊 توليد ملف SUMMARY NUPCO</div>
+    <div class="cmp-sub">ارفع ملفات العلا والمدينة (2025 و2026) ويولّد لك ملف Excel كامل — Today + Summary + Grand Total + Order Rush</div>
+
+    <!-- ملفات الرفع - شبكة 2x2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+
+      <label class="cmp-slot" id="sn-slot-a25">
+        <input type="file" id="sn-fi-a25" accept=".xlsx,.xls" style="display:none" onchange="snLoadFile('a25',this)"/>
+        <span class="slot-count" id="sn-cnt-a25" style="background:#0ea5e9;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();snClear('a25')">✕</button>
+        <span class="slot-ico">🏜️</span>
+        <div class="slot-lbl" style="color:#0ea5e9;">العلا 2025</div>
+        <div class="slot-sub" id="sn-nm-a25">Alula Dispatched 2025</div>
+      </label>
+
+      <label class="cmp-slot" id="sn-slot-m25">
+        <input type="file" id="sn-fi-m25" accept=".xlsx,.xls" style="display:none" onchange="snLoadFile('m25',this)"/>
+        <span class="slot-count" id="sn-cnt-m25" style="background:#10b981;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();snClear('m25')">✕</button>
+        <span class="slot-ico">🕌</span>
+        <div class="slot-lbl" style="color:#10b981;">المدينة 2025</div>
+        <div class="slot-sub" id="sn-nm-m25">Madinah Received 2025</div>
+      </label>
+
+      <label class="cmp-slot" id="sn-slot-a26">
+        <input type="file" id="sn-fi-a26" accept=".xlsx,.xls" style="display:none" onchange="snLoadFile('a26',this)"/>
+        <span class="slot-count" id="sn-cnt-a26" style="background:#f59e0b;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();snClear('a26')">✕</button>
+        <span class="slot-ico">🏜️</span>
+        <div class="slot-lbl" style="color:#f59e0b;">العلا 2026</div>
+        <div class="slot-sub" id="sn-nm-a26">Alula Dispatched 2026</div>
+      </label>
+
+      <label class="cmp-slot" id="sn-slot-m26">
+        <input type="file" id="sn-fi-m26" accept=".xlsx,.xls" style="display:none" onchange="snLoadFile('m26',this)"/>
+        <span class="slot-count" id="sn-cnt-m26" style="background:#8b5cf6;">0</span>
+        <button class="slot-clr" onclick="event.preventDefault();event.stopPropagation();snClear('m26')">✕</button>
+        <span class="slot-ico">🕌</span>
+        <div class="slot-lbl" style="color:#a78bfa;">المدينة 2026</div>
+        <div class="slot-sub" id="sn-nm-m26">Madinah Received 2026</div>
+      </label>
+
+    </div>
+
+    <!-- ملاحظة: على الأقل ملفين -->
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+      💡 ارفع ما عندك — مثلاً العلا 2026 + المدينة 2026 فقط. كل ملف اختياري ما عدا واحد على الأقل.
+    </div>
+
+    <!-- زر التوليد -->
+    <button class="cmp-btn" id="snBtn" disabled onclick="runSummaryGen()" style="background:linear-gradient(135deg,#2D0A1E,#C4216A);">
+      📊 توليد ملف SUMMARY NUPCO
+    </button>
+
+    <!-- نتيجة -->
+    <div id="snRes" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+        <div class="sc"><span class="sv" id="sn-total" style="color:var(--accent)">0</span><span class="sl">إجمالي الأوردرات</span></div>
+        <div class="sc"><span class="sv" id="sn-alula" style="color:#0ea5e9">0</span><span class="sl">العلا</span></div>
+        <div class="sc"><span class="sv" id="sn-mad"   style="color:#10b981">0</span><span class="sl">المدينة</span></div>
+        <div class="sc"><span class="sv" id="sn-rush"  style="color:var(--red)">0</span><span class="sl">Rush / Urgent</span></div>
+      </div>
+      <button onclick="downloadSummaryNupco()" style="width:100%;background:linear-gradient(135deg,#2D0A1E,#C4216A);color:white;border:none;padding:14px;border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+        📥 تحميل SUMMARY_NUPCO.xlsx
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let imgs=[],newRecs=[],oldRecs=[];
+const HDRS=['File Name','Order Number','Order Create Date','Shipment Number','Dispatch Date','Dispatched User','Sender','Consignee','Pharmacy Code','City','Line','Item No','Description','Item Family','Client ID','Quantity','Batch','Expiry Date','Total Quantity','Truck Number','Pallets Count','Processed Date'];
+const KEYS=['_file','order_number','order_create_date','shipment_number','dispatch_date','dispatched_user','sender','consignee','pharmacy_code','city','line','item_no','description','item_family','client_id','quantity','batch','expiry_date','total_quantity','truck_number','pallets_count','_date'];
+const PROMPT='Extract these fields from this Goods Delivery Note image. Return ONLY a JSON object, no markdown:\n{"order_number":"","order_create_date":"","shipment_number":"","dispatch_date":"","dispatched_user":"","sender":"","consignee":"","pharmacy_code":"","city":"","line":"","item_no":"","description":"","item_family":"","client_id":"","quantity":"","batch":"","expiry_date":"","total_quantity":"","truck_number":"","pallets_count":""}\nUse "" for any missing field.';
+
+const uz=document.getElementById('upzone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('over'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');addImgs([...e.dataTransfer.files]);});
+document.getElementById('fileInput').addEventListener('change',e=>addImgs([...e.target.files]));
+
+function addImgs(files){imgs=[...imgs,...files.filter(f=>f.type.startsWith('image/'))];render();}
+function render(){
+  const sec=document.getElementById('prevSec'),btn=document.getElementById('pbtn');
+  if(!imgs.length){sec.style.display='none';btn.disabled=true;document.getElementById('btxt').textContent='ارفع صوراً للبدء';return;}
+  sec.style.display='block';document.getElementById('cnt').textContent=imgs.length;
+  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة '+imgs.length+' صورة وإضافتها للأرشيف';
+  const g=document.getElementById('pgrid');g.innerHTML='';
+  imgs.forEach((f,i)=>{const url=URL.createObjectURL(f);const el=document.createElement('div');el.className='pitem';
+    el.innerHTML='<img src="'+url+'"><button class="rmbtn" onclick="rmImg('+i+')">✕</button><div class="pname">'+f.name+'</div>';g.appendChild(el);});
+}
+function rmImg(i){imgs.splice(i,1);render();}
+function clearImgs(){imgs=[];document.getElementById('fileInput').value='';render();}
+
+document.getElementById('archiveInput').addEventListener('change',async function(e){
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const sheetName=wb.SheetNames.includes('ARCHIVE')?'ARCHIVE':wb.SheetNames[0];
+    const ws=wb.Sheets[sheetName];
+    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    let hdrRow=-1;
+    raw.forEach((row,i)=>{if(row.includes('File Name'))hdrRow=i;});
+    if(hdrRow===-1){alert('ما أقدر أقرأ الملف');return;}
+    const rows=XLSX.utils.sheet_to_json(ws,{header:raw[hdrRow],defval:'',range:hdrRow});
+    rows.shift();
+    oldRecs=rows.filter(r=>r['File Name']).map(row=>{
+      const r={_isOld:true,_month:row['Month-Year']||''};
+      HDRS.forEach((h,i)=>{r[KEYS[i]]=row[h]||'';});
+      return r;
+    });
+    document.getElementById('istat').textContent='✓ '+oldRecs.length+' سجل';
+    document.getElementById('istat').className='istat ok';
+    log('استيراد الأرشيف: '+oldRecs.length+' سجل قديم','lok');
+  }catch(err){alert('خطأ: '+err.message);}
+});
+
+function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+
+async function extract(file){
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('mdl').value;
+  if(!key)throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
+  const b=await b64(file);
+  const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':location.href,'X-Title':'NUPCO Invoice Archiver'},
+    body:JSON.stringify({model,max_tokens:1000,messages:[{role:'user',content:[
+      {type:'image_url',image_url:{url:'data:'+(file.type||'image/jpeg')+';base64,'+b}},
+      {type:'text',text:PROMPT}]}]})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+res.status);}
+  const data=await res.json();
+  let txt=data.choices?.[0]?.message?.content||'{}';
+  txt=txt.replace(/```json\s*|\s*```/g,'').trim();
+  const p=JSON.parse(txt);
+  const now=new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  p._file=file.name;p._date=now.toLocaleDateString('en-GB');
+  p._month=months[now.getMonth()]+'-'+now.getFullYear();
+  p._status='success';p._isOld=false;
+  return p;
+}
+
+function log(msg,cls){
+  const b=document.getElementById('logbox');const el=document.createElement('div');el.className=cls||'linf';
+  el.textContent='['+new Date().toLocaleTimeString('ar-SA')+'] '+msg;b.appendChild(el);b.scrollTop=b.scrollHeight;
+}
+
+async function processAll(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('الرقم السري غير موجود. تأكد من إعدادات الملف من قبل الإدارة.');return;}
+  if(!imgs.length)return;
+  newRecs=[];
+  const btn=document.getElementById('pbtn');btn.disabled=true;document.getElementById('btxt').textContent='جاري المعالجة...';
+  document.getElementById('progsec').style.display='block';document.getElementById('ressec').style.display='none';
+  document.getElementById('logbox').innerHTML='';
+  if(oldRecs.length)log('الأرشيف: '+oldRecs.length+' سجل قديم','linf');
+  log('بدء معالجة '+imgs.length+' صورة...','linf');
+  const total=imgs.length;let done=0,ok=0,err=0;
+  for(let i=0;i<total;i++){
+    const f=imgs[i];log('['+( i+1)+'/'+total+'] '+f.name,'linf');
+    try{const r=await extract(f);r._rawFile=f;newRecs.push(r);log('✓ رقم الطلب: '+(r.order_number||'—'),'lok');ok++;}
+    catch(e){newRecs.push({_file:f.name,_status:'error',_error:e.message,_isOld:false});log('✗ '+f.name+': '+e.message,'lerr');err++;}
+    done++;document.getElementById('bfill').style.width=Math.round(done/total*100)+'%';document.getElementById('pnum').textContent=done+' / '+total;
+  }
+  const allOk=newRecs.filter(r=>r._status==='success');
+  log('اكتمل! '+ok+' نجاح · '+err+' أخطاء',ok===total?'lok':'lwarn');
+  showRes(ok,err,allOk);
+  btn.disabled=false;document.getElementById('btxt').textContent='⚡ معالجة مرة أخرى';
+}
+
+function showRes(ok,err,allOk){
+  document.getElementById('stot').textContent=oldRecs.length+allOk.length;
+  document.getElementById('snew').textContent=allOk.length;
+  document.getElementById('serr').textContent=err;
+  const tb=document.getElementById('tbody');tb.innerHTML='';
+  [...oldRecs,...newRecs].forEach((d,i)=>{
+    const tr=document.createElement('tr');tr.className=d._isOld?'rold':'rnew';
+    const tag=d._isOld?'<span class="told">قديم</span>':'<span class="tnew">جديد ✦</span>';
+    const st=d._status==='error'?'<span class="serr">✗ خطأ</span>':'<span class="sok">✓</span>';
+    tr.innerHTML='<td>'+tag+'</td><td style="color:var(--muted);">'+(i+1)+'</td><td>'+(d._file||'—').substring(0,22)+'</td><td><strong>'+(d.order_number||'—')+'</strong></td><td>'+(d.order_create_date||'—')+'</td><td>'+(d.consignee||'—')+'</td><td><strong>'+(d.quantity||'—')+'</strong></td><td>'+(d.truck_number||'—')+'</td><td>'+st+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('ressec').style.display='block';
+  document.getElementById('ressec').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function generateExcelWorkbook() {
+  const wb=XLSX.utils.book_new();
+  const BG='1A0810',WH='FFFFFF',ODD='F9F0F4',EVEN='FFFFFF',WBGC='FFF8E7',WFGC='FFB000',ACC='C4216A';
+  const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
+  function cs(v,bold,fg,bg,hz,sz){return{v:v==null?'':v,t:typeof v==='number'?'n':'s',s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Arial',sz:sz||10},fill:{patternType:'solid',fgColor:{rgb:bg||WH}},alignment:{horizontal:hz||'center',vertical:'center',wrapText:true},border:bdr}};}
+  const ALL_HDRS=[...HDRS,'Month-Year'];
+  const ALL_KEYS=[...KEYS,'_month'];
+  const CW=[28,16,16,16,14,14,26,26,12,12,8,18,40,14,14,10,14,12,12,12,12,18,12];
+  const LEFT=[6,7,12];
+  const allData=[...oldRecs,...newRecs.filter(d=>d._status==='success')];
+  const wsData=[];
+  const t1=[cs('🚚 Delivery Archive — NUPCO Madinah | أرشيف فواتير التسليم',true,WH,BG,'center',13)];
+  for(let i=1;i<23;i++)t1.push(cs('',false,WH,BG));wsData.push(t1);
+  const t2=[cs('⚠ أضف كل فاتورة جديدة في صف جديد — لا تحذف الصفوف القديمة | Add each new invoice as a new row only',false,WFGC,WBGC,'center',10)];
+  for(let i=1;i<23;i++)t2.push(cs('',false,WFGC,WBGC));wsData.push(t2);
+  wsData.push(ALL_HDRS.map(h=>cs(h,true,WH,BG,'center',10)));
+  allData.forEach((d,idx)=>{
+    const bg=idx%2===0?ODD:EVEN;
+    wsData.push(ALL_KEYS.map((k,ci)=>cs(d[k]||'',false,'000000',bg,LEFT.includes(ci)?'left':'center',10)));
+  });
+  const ws=XLSX.utils.aoa_to_sheet(wsData.map(r=>r.map(c=>c.v)));
+  wsData.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws[a])ws[a].s=cell.s;}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:22}},{s:{r:1,c:0},e:{r:1,c:22}}];
+  ws['!cols']=CW.map(w=>({wch:w}));ws['!rows']=[{hpt:32},{hpt:20},{hpt:28}];
+  XLSX.utils.book_append_sheet(wb,ws,'ARCHIVE');
+  const monthMap={};
+  allData.forEach(d=>{const m=d._month||'Unknown';if(!monthMap[m])monthMap[m]={orders:new Set(),rows:0,consignees:{}};
+    if(d.order_number)monthMap[m].orders.add(d.order_number);monthMap[m].rows++;
+    const c2=d.consignee||'';if(c2)monthMap[m].consignees[c2]=(monthMap[m].consignees[c2]||0)+1;});
+  const sumRows=[];
+  const s1=[cs('📊 ملخص التوزيع — يتحدث تلقائياً من ARCHIVE',true,WH,BG,'center',12)];
+  for(let i=1;i<5;i++)s1.push(cs('',false,WH,BG));sumRows.push(s1);
+  const s2=[cs('الملخص الشهري | Monthly Summary',true,ACC,'F5E6ED','center',11)];
+  for(let i=1;i<5;i++)s2.push(cs('',false,ACC,'F5E6ED'));sumRows.push(s2);
+  sumRows.push(['الشهر','طلبات فريدة','صفوف','أبرز جهة','الحالة'].map(h=>cs(h,true,WH,BG,'center',10)));
+  Object.entries(monthMap).forEach(([m,v],i)=>{
+    const bg=i%2===0?ODD:EVEN;
+    const topC=Object.entries(v.consignees).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+    sumRows.push([m,v.orders.size,v.rows,topC,'نشط'].map((val,ci)=>cs(val,ci===1,'000000',bg,'center',10)));
+  });
+  const ws2=XLSX.utils.aoa_to_sheet(sumRows.map(r=>r.map(c=>c.v)));
+  sumRows.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws2[a])ws2[a].s=cell.s;}));
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:4}},{s:{r:1,c:0},e:{r:1,c:4}}];
+  ws2['!cols']=[{wch:14},{wch:16},{wch:10},{wch:22},{wch:12}];ws2['!rows']=[{hpt:30},{hpt:24},{hpt:26}];
+  XLSX.utils.book_append_sheet(wb,ws2,'SUMMARY');
+  return wb;
+}
+
+function downloadExcelLocal() {
+  const wb = generateExcelWorkbook();
+  XLSX.writeFile(wb, 'delivery_archive_' + new Date().toISOString().slice(0,10) + '.xlsx', {cellStyles:true});
+}
+
+async function downloadImagesLocal() {
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (!successRecs.length) return alert('لا توجد صور لمعالجتها');
+  const zip = new JSZip();
+  successRecs.forEach(rec => {
+    const ext = rec._file.split('.').pop();
+    const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+    zip.file(`${safeName}.${ext}`, rec._rawFile);
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `Invoices_${new Date().toISOString().slice(0,10)}.zip`;
+  link.click();
+}
+
+async function uploadToAppsScript(base64Data, fileName, mimeType, scriptUrl) {
+  const payload = { base64: base64Data, fileName: fileName, mimeType: mimeType };
+  const res = await fetch(scriptUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+async function uploadAllToDrive() {
+  const scriptUrl = document.getElementById('gScriptUrl').value.trim();
+  if (!scriptUrl) return alert('رابط الإرسال غير متوفر، يرجى مراجعة الإدارة.');
+
+  const successRecs = newRecs.filter(r => r._status === 'success' && r.order_number);
+  if (successRecs.length === 0 && oldRecs.length === 0) return alert('لا توجد فواتير للرفع!');
+
+  const btn = document.getElementById('driveBtn');
+  const oldText = btn.innerHTML;
+  btn.innerHTML = '⏳ جاري الإرسال للدرايف... يرجى الانتظار';
+  btn.disabled = true;
+
+  try {
+    log('بدء الرفع المباشر...', 'linf');
+
+    const wb = generateExcelWorkbook();
+    const excelBase64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+    const excelName = 'Archive_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    
+    log('جاري رفع ملف Excel...', 'linf');
+    await uploadToAppsScript(excelBase64, excelName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', scriptUrl);
+    log('✓ تم رفع Excel بنجاح', 'lok');
+
+    for (let i = 0; i < successRecs.length; i++) {
+      const rec = successRecs[i];
+      const ext = rec._file.split('.').pop();
+      const safeName = rec.order_number.replace(/[^a-zA-Z0-9_-]/g, '');
+      const finalName = `${safeName}.${ext}`;
+      
+      const imgBase64 = await b64(rec._rawFile);
+      log(`جاري رفع الصورة: ${finalName}`, 'linf');
+      await uploadToAppsScript(imgBase64, finalName, rec._rawFile.type, scriptUrl);
+    }
+
+    log('🎉 اكتمل الرفع إلى المجلد المشترك بنجاح!', 'lok');
+    alert('تم إرسال الأرشيف والصور إلى الإدارة بنجاح!');
+
+  } catch (error) {
+    log('✗ حدث خطأ أثناء الرفع: ' + error.message, 'lerr');
+    alert('حدث خطأ أثناء الرفع، التأكد من اتصال الإنترنت.');
+  } finally {
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+  }
+}
+// ══════════════════════════════════════════════
+// قسم المقارنة
+// ══════════════════════════════════════════════
+const slotData = { arch: null, ula: null, mad: null };
+const slotLabels = { arch: 'الأرشيف', ula: 'العلا', mad: 'المدينة' };
+
+function clearSlot(id) {
+  slotData[id] = null;
+  document.getElementById('fi-'+id).value = '';
+  document.getElementById('slot-'+id).classList.remove('loaded');
+  document.getElementById('count-'+id).textContent = '0';
+  document.getElementById('name-'+id).textContent = 'اضغط لاختيار الملف';
+  checkCmpBtn();
+}
+
+function checkCmpBtn() {
+  const loaded = Object.values(slotData).filter(v => v !== null).length;
+  document.getElementById('cmpBtn').disabled = loaded < 2;
+}
+
+async function loadSlot(id, input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const MONTH_SHEETS = ['january','february','march','april','may','june',
+                        'july','august','september','october','november','december'];
+
+  function isOrderNo(val) {
+    if (!val) return false;
+    const s = val.toString().trim();
+    // Pattern: digits-digits-digits like 004-832-188
+    return /^\d{3}-\d{3}-\d{3}$/.test(s);
+  }
+
+  function findOrderColInRow(row) {
+    // Find column index where header matches order number columns
+    for (let i = 0; i < row.length; i++) {
+      const v = (row[i]||'').toString().trim().toLowerCase();
+      if (v.includes('order') && (v.includes('no') || v.includes('number'))) return i;
+    }
+    return -1;
+  }
+
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, { type: 'array' });
+    const orders = new Set();
+    let sheetsRead = [];
+
+    // ── Strategy 1: ARCHIVE sheet (our format) ──────────────────
+    if (wb.SheetNames.includes('ARCHIVE')) {
+      const ws  = wb.Sheets['ARCHIVE'];
+      const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      let hdrRow = -1;
+      raw.forEach((row, i) => {
+        if (row.some(c => (c||'').toString().includes('Order Number'))) hdrRow = i;
+      });
+      if (hdrRow >= 0) {
+        raw.slice(hdrRow + 1).forEach(row => {
+          // Order Number is column index 1 (B)
+          const v = (row[1]||'').toString().trim();
+          if (isOrderNo(v)) orders.add(v);
+        });
+        sheetsRead.push('ARCHIVE');
+      }
+    }
+
+    // ── Strategy 2: Monthly sheets (ALULA / MADINAH format) ─────
+    if (orders.size === 0) {
+      wb.SheetNames.forEach(shName => {
+        if (!MONTH_SHEETS.includes(shName.trim().toLowerCase())) return;
+        const ws  = wb.Sheets[shName];
+        const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        // Find header row (scan first 5 rows)
+        let orderCol = -1;
+        let dataStart = 1;
+        for (let ri = 0; ri < Math.min(5, raw.length); ri++) {
+          const col = findOrderColInRow(raw[ri]);
+          if (col >= 0) { orderCol = col; dataStart = ri + 1; break; }
+        }
+        if (orderCol < 0) orderCol = 1; // fallback: col B for MADINAH
+
+        raw.slice(dataStart).forEach(row => {
+          const v = (row[orderCol]||'').toString().trim();
+          if (isOrderNo(v)) orders.add(v);
+        });
+        sheetsRead.push(shName);
+      });
+    }
+
+    // ── Strategy 3: First sheet fallback ────────────────────────
+    if (orders.size === 0) {
+      const ws  = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      let orderCol = -1, dataStart = 1;
+      for (let ri = 0; ri < Math.min(5, raw.length); ri++) {
+        const col = findOrderColInRow(raw[ri]);
+        if (col >= 0) { orderCol = col; dataStart = ri + 1; break; }
+      }
+      if (orderCol < 0) orderCol = 0;
+      raw.slice(dataStart).forEach(row => {
+        const v = (row[orderCol]||'').toString().trim();
+        if (isOrderNo(v)) orders.add(v);
+      });
+      sheetsRead.push(wb.SheetNames[0]);
+    }
+
+    slotData[id] = orders;
+    document.getElementById('slot-'+id).classList.add('loaded');
+    document.getElementById('count-'+id).textContent = orders.size.toLocaleString();
+    document.getElementById('name-'+id).textContent =
+      file.name.substring(0,20) + (sheetsRead.length > 1 ? ` (${sheetsRead.length} شيت)` : '');
+    checkCmpBtn();
+
+  } catch(e) {
+    alert('خطأ في قراءة الملف: ' + e.message);
+  }
+}
+
+function runCompare() {
+  const A = slotData.arch || new Set();
+  const U = slotData.ula  || new Set();
+  const M = slotData.mad  || new Set();
+
+  const all = new Set([...A, ...U, ...M]);
+
+  // KPI - with localized numbers
+  document.getElementById('kv-arch').textContent = A.size.toLocaleString();
+  document.getElementById('kv-ula').textContent  = U.size.toLocaleString();
+  document.getElementById('kv-mad').textContent  = M.size.toLocaleString();
+
+  // Categorize
+  const onlyA   = [...all].filter(o =>  A.has(o) && !U.has(o) && !M.has(o));
+  const onlyU   = [...all].filter(o => !A.has(o) &&  U.has(o) && !M.has(o));
+  const onlyM   = [...all].filter(o => !A.has(o) && !U.has(o) &&  M.has(o));
+  const inAll3  = [...all].filter(o =>  A.has(o) &&  U.has(o) &&  M.has(o));
+  const inAU    = [...all].filter(o =>  A.has(o) &&  U.has(o) && !M.has(o));
+  const inAM    = [...all].filter(o =>  A.has(o) && !U.has(o) &&  M.has(o));
+  const inUM    = [...all].filter(o => !A.has(o) &&  U.has(o) &&  M.has(o));
+
+  // أوردرات موجودة في العلا أو المدينة لكن مش في الأرشيف (مهمة!)
+  const notInArch = [...all].filter(o => !A.has(o) && (U.has(o) || M.has(o)));
+
+  function fillList(elId, items) {
+    const ul = document.getElementById(elId);
+    ul.innerHTML = '';
+    if (!items.length) {
+      ul.innerHTML = '<li style="color:var(--muted);font-size:11px;padding:8px 0;text-align:center">لا يوجد ✓</li>';
+      return;
+    }
+    items.slice(0, 60).forEach(o => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="ord">${o}</span>`;
+      ul.appendChild(li);
+    });
+    if (items.length > 60) {
+      const li = document.createElement('li');
+      li.style.cssText = 'color:var(--muted);justify-content:center;';
+      li.textContent = `... و ${(items.length - 60).toLocaleString()} أخرى`;
+      ul.appendChild(li);
+    }
+  }
+
+  fillList('only-arch', onlyA);
+  fillList('only-ula',  onlyU);
+  fillList('only-mad',  onlyM);
+
+  // Update vbox titles with counts
+  document.querySelector('#only-arch').parentElement.querySelector('h4').innerHTML =
+    `<span style="color:#f59e0b">●</span> في الأرشيف فقط <span style="background:rgba(245,158,11,.2);color:#f59e0b;border-radius:10px;padding:1px 8px;font-size:11px;margin-right:4px">${onlyA.length}</span>`;
+  document.querySelector('#only-ula').parentElement.querySelector('h4').innerHTML =
+    `<span style="color:#0ea5e9">●</span> في العلا فقط <span style="background:rgba(14,165,233,.2);color:#0ea5e9;border-radius:10px;padding:1px 8px;font-size:11px;margin-right:4px">${onlyU.length}</span>`;
+  document.querySelector('#only-mad').parentElement.querySelector('h4').innerHTML =
+    `<span style="color:#10b981">●</span> في المدينة فقط <span style="background:rgba(16,185,129,.2);color:#10b981;border-radius:10px;padding:1px 8px;font-size:11px;margin-right:4px">${onlyM.length}</span>`;
+
+  // Summary bar above table
+  const tableTitle = document.getElementById('cmpTableTitle');
+  if (tableTitle) {
+    tableTitle.innerHTML = `
+      📋 جدول مقارنة كامل
+      <span style="margin-right:auto;display:flex;gap:8px;font-size:11px;font-weight:400">
+        <span style="background:rgba(16,185,129,.15);color:var(--green);padding:2px 10px;border-radius:8px">الكل: ${inAll3.length}</span>
+        <span style="background:rgba(245,158,11,.12);color:var(--yellow);padding:2px 10px;border-radius:8px">ملفين: ${(inAU.length+inAM.length+inUM.length)}</span>
+        <span style="background:rgba(239,68,68,.12);color:var(--red);padding:2px 10px;border-radius:8px">واحد فقط: ${(onlyA.length+onlyU.length+onlyM.length)}</span>
+      </span>`;
+  }
+
+  // Filter buttons
+  let currentFilter = 'all';
+  window._cmpData = { A, U, M, all: [...all].sort(), onlyA, onlyU, onlyM, inAll3, inAU, inAM, inUM, notInArch };
+
+  renderTable(currentFilter);
+
+  document.getElementById('cmpRes').style.display = 'block';
+  document.getElementById('cmpRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderTable(filter) {
+  const { A, U, M, all, onlyA, onlyU, onlyM, inAll3, notInArch } = window._cmpData || {};
+  if (!A) return;
+
+  // Choose which orders to show
+  let toShow;
+  if (filter === 'all')       toShow = all;
+  else if (filter === 'ok')   toShow = inAll3;
+  else if (filter === 'miss') toShow = notInArch;
+  else if (filter === 'arch') toShow = onlyA;
+  else                        toShow = all;
+
+  const tbody = document.getElementById('cmpBody');
+  tbody.innerHTML = '';
+
+  toShow.forEach((o, i) => {
+    const inA = A.has(o), inU = U.has(o), inM = M.has(o);
+    const count = [inA,inU,inM].filter(Boolean).length;
+
+    let statusTxt, statusColor, rowBg = '';
+    if (count === 3)      { statusTxt = 'الكل ✓';        statusColor = 'var(--green)'; }
+    else if (count === 2) { statusTxt = 'ملفين';          statusColor = 'var(--yellow)'; rowBg='rgba(245,158,11,.04)'; }
+    else                  { statusTxt = 'ملف واحد فقط';  statusColor = 'var(--red)';    rowBg='rgba(239,68,68,.05)'; }
+
+    const tr = document.createElement('tr');
+    if (rowBg) tr.style.background = rowBg;
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:10px">${i+1}</td>
+      <td><strong style="font-family:'JetBrains Mono',monospace;font-size:12px">${o}</strong></td>
+      <td class="chk ${inA?'yes':'no'}">${inA?'✓':'✗'}</td>
+      <td class="chk ${inU?'yes':'no'}">${inU?'✓':'✗'}</td>
+      <td class="chk ${inM?'yes':'no'}">${inM?'✓':'✗'}</td>
+      <td style="color:${statusColor};font-weight:700;font-size:11px">${statusTxt}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Update count
+  const countEl = document.getElementById('tableCount');
+  if (countEl) countEl.textContent = `${toShow.length.toLocaleString()} أوردر`;
+
+  // Update active filter btn
+  document.querySelectorAll('.flt-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.flt-btn[data-f="${filter}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+function downloadCompareExcel() {
+  const A = slotData.arch || new Set();
+  const U = slotData.ula  || new Set();
+  const M = slotData.mad  || new Set();
+  const all = [...new Set([...A, ...U, ...M])].sort();
+
+  const BG='1A0810',WH='FFFFFF',GR='D5F5E3',RD='FADBD8',YL='FEF9E7';
+  const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
+  function cs(v,bold,fg,bg,hz){return{v:v??'',t:'s',s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Arial',sz:10},fill:{patternType:'solid',fgColor:{rgb:bg||WH}},alignment:{horizontal:hz||'center',vertical:'center'},border:bdr}};}
+
+  const wbNew = XLSX.utils.book_new();
+  const rows = [];
+
+  // Title
+  const t1=[cs('⚖️ تقرير مقارنة الأرشيف بين الفروع',true,WH,BG,'center')];
+  for(let i=1;i<6;i++)t1.push(cs('',false,WH,BG));rows.push(t1);
+
+  // Sub-title
+  rows.push([cs(`الأرشيف: ${A.size} | العلا: ${U.size} | المدينة: ${M.size} | إجمالي: ${all.length}`,false,'FFB000','FFF8E7','center'),
+    cs('',false,'FFB000','FFF8E7'),cs('',false,'FFB000','FFF8E7'),cs('',false,'FFB000','FFF8E7'),cs('',false,'FFB000','FFF8E7'),cs('',false,'FFB000','FFF8E7')]);
+
+  // Headers
+  rows.push(['#','رقم الأوردر','📦 الأرشيف','🏜️ العلا','🕌 المدينة','الحالة'].map(h=>cs(h,true,WH,BG)));
+
+  // Data
+  all.forEach((o,i) => {
+    const inA=A.has(o),inU=U.has(o),inM=M.has(o);
+    const cnt=[inA,inU,inM].filter(Boolean).length;
+    const bg = cnt===3?GR : cnt===1?RD : YL;
+    const st = cnt===3?'الكل' : cnt===1?'ملف واحد فقط' : 'ملفين';
+    rows.push([cs(i+1,false,'000000',bg),cs(o,true,'000000',bg),
+      cs(inA?'✓':'✗',true,inA?'1E8449':'C0392B',bg),
+      cs(inU?'✓':'✗',true,inU?'1E8449':'C0392B',bg),
+      cs(inM?'✓':'✗',true,inM?'1E8449':'C0392B',bg),
+      cs(st,false,'000000',bg)]);
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet(rows.map(r=>r.map(c=>c.v)));
+  rows.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws[a])ws[a].s=cell.s;}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}},{s:{r:1,c:0},e:{r:1,c:5}}];
+  ws['!cols']=[{wch:6},{wch:22},{wch:12},{wch:12},{wch:12},{wch:18}];
+  ws['!rows']=[{hpt:28},{hpt:20},{hpt:24}];
+  XLSX.utils.book_append_sheet(wbNew,ws,'المقارنة');
+
+  // Summary sheet
+  const sumRows=[
+    [cs('ملخص المقارنة',true,WH,BG,'center'),cs('',false,WH,BG),cs('',false,WH,BG)],
+    [cs('البيان',true,WH,BG),cs('العدد',true,WH,BG),cs('الملاحظة',true,WH,BG)],
+    [cs('إجمالي الأوردرات الفريدة',false,'000000','EBF5FB'),cs(all.length,true,'000000','EBF5FB'),cs('عبر الثلاث ملفات',false,'000000','EBF5FB')],
+    [cs('الأرشيف',false,'000000','FEF9E7'),cs(A.size,true,'000000','FEF9E7'),cs('أوردر فريد',false,'000000','FEF9E7')],
+    [cs('العلا',false,'000000','EBF5FB'),cs(U.size,true,'000000','EBF5FB'),cs('أوردر فريد',false,'000000','EBF5FB')],
+    [cs('المدينة',false,'000000','FEF9E7'),cs(M.size,true,'000000','FEF9E7'),cs('أوردر فريد',false,'000000','FEF9E7')],
+    [cs('موجود في الكل',false,'000000',GR),cs(all.filter(o=>A.has(o)&&U.has(o)&&M.has(o)).length,true,'1E8449',GR),cs('✓',false,'1E8449',GR)],
+    [cs('في ملف واحد فقط',false,'000000',RD),cs(all.filter(o=>[A.has(o),U.has(o),M.has(o)].filter(Boolean).length===1).length,true,'C0392B',RD),cs('يحتاج مراجعة',false,'C0392B',RD)],
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(sumRows.map(r=>r.map(c=>c.v)));
+  sumRows.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws2[a])ws2[a].s=cell.s;}));
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}}];
+  ws2['!cols']=[{wch:28},{wch:14},{wch:20}];
+  XLSX.utils.book_append_sheet(wbNew,ws2,'الملخص');
+
+  XLSX.writeFile(wbNew,'compare_report_'+new Date().toISOString().slice(0,10)+'.xlsx',{cellStyles:true});
+}
+
+// ══════════════════════════════════════════════
+// دمج ملفات الأرشيف
+// ══════════════════════════════════════════════
+let mergeFiles = []; // [{file, name, records}]
+
+// Drag & drop on merge zone
+const mDrop = document.getElementById('mergeDrop');
+mDrop.addEventListener('dragover', e => { e.preventDefault(); mDrop.style.borderColor='var(--accent)'; });
+mDrop.addEventListener('dragleave', () => { mDrop.style.borderColor=''; });
+mDrop.addEventListener('drop', e => { e.preventDefault(); mDrop.style.borderColor=''; addMergeFiles(null, [...e.dataTransfer.files]); });
+
+async function addMergeFiles(input, droppedFiles) {
+  const files = droppedFiles || [...input.files];
+  if (!files.length) return;
+  for (const file of files) {
+    if (!file.name.match(/\.(xlsx|xls|csv)$/i)) continue;
+    // avoid duplicates by name
+    if (mergeFiles.find(m => m.name === file.name)) continue;
+    const records = await readArchiveFile(file);
+    mergeFiles.push({ file, name: file.name, records });
+  }
+  if (input) input.value = '';
+  renderMergeList();
+}
+
+async function readArchiveFile(file) {
+  const buf = await file.arrayBuffer();
+  const wb  = XLSX.read(buf, { type: 'array' });
+  // Find ARCHIVE sheet or first sheet
+  const sheetName = wb.SheetNames.includes('ARCHIVE') ? 'ARCHIVE' : wb.SheetNames[0];
+  const ws  = wb.Sheets[sheetName];
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  // Find header row
+  let hdrRow = -1;
+  raw.forEach((row, i) => { if (row.some(c => (c||'').toString().includes('File Name'))) hdrRow = i; });
+  if (hdrRow < 0) hdrRow = 0;
+  const rows = XLSX.utils.sheet_to_json(ws, { header: raw[hdrRow], defval: '', range: hdrRow });
+  rows.shift();
+  return rows.filter(r => r['File Name'] || r['Order Number']);
+}
+
+function renderMergeList() {
+  const list   = document.getElementById('mergeFileList');
+  const items  = document.getElementById('mergeFileItems');
+  const count  = document.getElementById('mergeCount');
+  const btn    = document.getElementById('mergeBtn');
+  if (!mergeFiles.length) { list.style.display='none'; btn.disabled=true; return; }
+  list.style.display = 'block';
+  btn.disabled = false;
+  count.textContent = mergeFiles.length;
+  items.innerHTML = '';
+  mergeFiles.forEach((m, i) => {
+    const el = document.createElement('div');
+    el.className = 'merge-file-item';
+    el.innerHTML = `
+      <span class="mf-ico">📊</span>
+      <div class="mf-info">
+        <div class="mf-name">${m.name}</div>
+        <div class="mf-count">${m.records.length.toLocaleString()} سجل</div>
+      </div>
+      <span class="mf-badge" style="background:rgba(14,165,233,.15);color:var(--accent)">ملف ${i+1}</span>
+      <button class="mf-rm" onclick="removeMergeFile(${i})">✕</button>`;
+    items.appendChild(el);
+  });
+}
+
+function removeMergeFile(i) {
+  mergeFiles.splice(i, 1);
+  renderMergeList();
+  document.getElementById('mergeRes').style.display = 'none';
+}
+
+function clearMergeFiles() {
+  mergeFiles = [];
+  document.getElementById('mergeInput').value = '';
+  renderMergeList();
+  document.getElementById('mergeRes').style.display = 'none';
+}
+
+function runMerge() {
+  if (!mergeFiles.length) return;
+  const dedupe    = document.getElementById('mergeDedupe').checked;
+  const keepFirst = document.getElementById('mergeKeepFirst').checked;
+
+  // Combine all records
+  let allRecs = [];
+  mergeFiles.forEach(m => allRecs.push(...m.records));
+  const totalBefore = allRecs.length;
+
+  // Deduplicate by Order Number
+  let finalRecs = allRecs;
+  if (dedupe) {
+    const seen = new Map();
+    allRecs.forEach(r => {
+      const key = (r['Order Number'] || r['order_number'] || '').toString().trim();
+      if (!key) { finalRecs.push(r); return; }
+      if (keepFirst) {
+        if (!seen.has(key)) seen.set(key, r);
+      } else {
+        seen.set(key, r); // keep last
+      }
+    });
+    finalRecs = [...seen.values()];
+    // Add rows with no order number
+    allRecs.forEach(r => {
+      const key = (r['Order Number'] || r['order_number'] || '').toString().trim();
+      if (!key) finalRecs.push(r);
+    });
+  }
+
+  const removed = totalBefore - finalRecs.length;
+  document.getElementById('mTotal').textContent = totalBefore.toLocaleString();
+  document.getElementById('mUniq').textContent  = finalRecs.length.toLocaleString();
+  document.getElementById('mDup').textContent   = removed.toLocaleString();
+  document.getElementById('mergeRes').style.display = 'block';
+
+  // Store for download
+  window._mergedRecs = finalRecs;
+  document.getElementById('mergeRes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function downloadMerged() {
+  const recs = window._mergedRecs;
+  if (!recs || !recs.length) return;
+
+  const wb2 = XLSX.utils.book_new();
+  const BG='1A0810', WH='FFFFFF', ODD='F9F0F4', EVEN='FFFFFF', WBGC='FFF8E7', WFGC='FFB000', ACC='C4216A';
+  const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
+  function cs(v,bold,fg,bg,hz){return{v:v==null?'':v,t:'s',s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Arial',sz:10},fill:{patternType:'solid',fgColor:{rgb:bg||WH}},alignment:{horizontal:hz||'center',vertical:'center',wrapText:true},border:bdr}};}
+
+  const KEYS_OUT = ['File Name','Order Number','Order Create Date','Shipment Number','Dispatch Date',
+    'Dispatched User','Sender','Consignee','Pharmacy Code','City','Line',
+    'Item No','Description','Item Family','Client ID','Quantity','Batch',
+    'Expiry Date','Total Quantity','Truck Number','Pallets Count','Processed Date','Month-Year'];
+  const CW = [28,16,16,16,14,14,26,26,12,12,8,18,40,14,14,10,14,12,12,12,12,18,12];
+  const LEFT = [0,6,7,12]; // File Name, Sender, Consignee, Description
+
+  const wsData = [];
+  // Title row
+  const t1=[cs('🚚 Delivery Archive — NUPCO Madinah | أرشيف فواتير التسليم',true,WH,BG,'center',13)];
+  for(let i=1;i<23;i++) t1.push(cs('',false,WH,BG)); wsData.push(t1);
+  // Warning row
+  const t2=[cs('⚠ أضف كل فاتورة جديدة في صف جديد — لا تحذف الصفوف القديمة',false,WFGC,WBGC,'center',10)];
+  for(let i=1;i<23;i++) t2.push(cs('',false,WFGC,WBGC)); wsData.push(t2);
+  // Headers
+  wsData.push(KEYS_OUT.map(h => cs(h,true,WH,BG,'center',10)));
+  // Data
+  recs.forEach((rec, idx) => {
+    const bg = idx%2===0 ? ODD : EVEN;
+    wsData.push(KEYS_OUT.map((k,ci) => cs(rec[k]||'', false,'000000', bg, LEFT.includes(ci)?'left':'center', 10)));
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData.map(r=>r.map(c=>c.v)));
+  wsData.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws[a])ws[a].s=cell.s;}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:22}},{s:{r:1,c:0},e:{r:1,c:22}}];
+  ws['!cols']=CW.map(w=>({wch:w}));
+  ws['!rows']=[{hpt:32},{hpt:20},{hpt:28}];
+  XLSX.utils.book_append_sheet(wb2, ws, 'ARCHIVE');
+
+  // Summary
+  const monthMap={};
+  recs.forEach(r=>{
+    const m=r['Month-Year']||'Unknown';
+    if(!monthMap[m])monthMap[m]={orders:new Set(),rows:0};
+    const on=(r['Order Number']||'').toString().trim();
+    if(on)monthMap[m].orders.add(on);
+    monthMap[m].rows++;
+  });
+  const sumData=[
+    [cs('📊 ملخص المدموج',true,WH,BG,'center',12),cs('',false,WH,BG),cs('',false,WH,BG)],
+    [cs('الشهر',true,WH,BG),cs('طلبات فريدة',true,WH,BG),cs('صفوف',true,WH,BG)],
+  ];
+  Object.entries(monthMap).forEach(([m,v],i)=>{
+    const bg=i%2===0?ODD:EVEN;
+    sumData.push([cs(m,false,'000000',bg),cs(v.orders.size,true,'000000',bg),cs(v.rows,false,'000000',bg)]);
+  });
+  const ws2=XLSX.utils.aoa_to_sheet(sumData.map(r=>r.map(c=>c.v)));
+  sumData.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws2[a])ws2[a].s=cell.s;}));
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}}];
+  ws2['!cols']=[{wch:14},{wch:16},{wch:10}];
+  XLSX.utils.book_append_sheet(wb2, ws2, 'SUMMARY');
+
+  XLSX.writeFile(wb2, 'merged_archive_'+new Date().toISOString().slice(0,10)+'.xlsx', {cellStyles:true});
+}
+
+// ══════════════════════════════════════════════
+// التحقق من حالة الأوردرات
+// ══════════════════════════════════════════════
+let refData   = null; // Map: orderNo -> {status, receiveDate, deliveredDate, department, otp, remark}
+let lcData    = null; // Array: [{orderNo, orderType}]
+let chkResults = [];  // final results
+
+const MONTH_SHEETS_CHK = ['january','february','march','april','may','june',
+                           'july','august','september','october','november','december'];
+
+async function loadRefFile(input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, {type:'array'});
+    const map = new Map(); // orderNo -> best record
+
+    wb.SheetNames.forEach(shName => {
+      if (!MONTH_SHEETS_CHK.includes(shName.trim().toLowerCase())) return;
+      const ws  = wb.Sheets[shName];
+      const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      // Find header row
+      let hdr = -1, colMap = {};
+      for (let ri = 0; ri < Math.min(5, raw.length); ri++) {
+        const r = raw[ri];
+        r.forEach((c,ci) => {
+          const v = (c||'').toString().trim().toLowerCase();
+          if (v === 'order no' || v === 'order number') colMap.orderNo = ci;
+          if (v === 'status')         colMap.status = ci;
+          if (v === 'receive date')   colMap.receiveDate = ci;
+          if (v === 'delivered date') colMap.deliveredDate = ci;
+          if (v === 'department')     colMap.dept = ci;
+          if (v === 'otp')            colMap.otp = ci;
+          if (v.includes('remark'))   colMap.remark = ci;
+        });
+        if (colMap.orderNo !== undefined) { hdr = ri; break; }
+      }
+      if (hdr < 0) return;
+
+      raw.slice(hdr + 1).forEach(row => {
+        const on = (row[colMap.orderNo]||'').toString().trim();
+        if (!on || !/\d{3}-\d{3}-\d{3}/.test(on)) return;
+        const rec = {
+          status:        (row[colMap.status]||'').toString().trim(),
+          receiveDate:   (row[colMap.receiveDate]||'').toString().trim(),
+          deliveredDate: (row[colMap.deliveredDate]||'').toString().trim(),
+          dept:          (row[colMap.dept]||'').toString().trim(),
+          otp:           (row[colMap.otp]||'').toString().trim(),
+          remark:        colMap.remark !== undefined ? (row[colMap.remark]||'').toString().trim() : '',
+          sheet:         shName
+        };
+        // Keep latest / most complete record
+        if (!map.has(on) || rec.status) map.set(on, rec);
+      });
+    });
+
+    refData = map;
+    document.getElementById('slot-ref').classList.add('loaded');
+    document.getElementById('count-ref').textContent = map.size.toLocaleString();
+    document.getElementById('name-ref').textContent = file.name.substring(0,22);
+    updateChkBtn();
+  } catch(e) { alert('خطأ في قراءة ملف المرجع: ' + e.message); }
+}
+
+async function loadLcFile(input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, {type:'array'});
+    const ws  = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    // Find header
+    let hdr = 0, orderCol = 0, typeCol = 1;
+    for (let ri = 0; ri < Math.min(3, raw.length); ri++) {
+      raw[ri].forEach((c,ci) => {
+        const v = (c||'').toString().toLowerCase();
+        if (v.includes('order') && !v.includes('type')) orderCol = ci;
+        if (v.includes('type')) typeCol = ci;
+      });
+      if (raw[ri].some(c => (c||'').toString().toLowerCase().includes('order'))) { hdr = ri; break; }
+    }
+    lcData = raw.slice(hdr+1)
+      .filter(r => r[orderCol] && /\d{3}-\d{3}-\d{3}/.test((r[orderCol]||'').toString()))
+      .map(r => ({
+        orderNo:   (r[orderCol]||'').toString().trim(),
+        orderType: (r[typeCol]||'').toString().trim()
+      }));
+
+    document.getElementById('slot-lc').classList.add('loaded');
+    document.getElementById('count-lc').textContent = lcData.length.toLocaleString();
+    document.getElementById('name-lc').textContent = file.name.substring(0,22);
+    updateChkBtn();
+  } catch(e) { alert('خطأ في قراءة ملف LC: ' + e.message); }
+}
+
+function clearRef() {
+  refData = null;
+  document.getElementById('fi-ref').value = '';
+  document.getElementById('slot-ref').classList.remove('loaded');
+  document.getElementById('count-ref').textContent = '0';
+  document.getElementById('name-ref').textContent = 'ملف به حالات الأوردرات';
+  updateChkBtn();
+}
+function clearLc() {
+  lcData = null;
+  document.getElementById('fi-lc').value = '';
+  document.getElementById('slot-lc').classList.remove('loaded');
+  document.getElementById('count-lc').textContent = '0';
+  document.getElementById('name-lc').textContent = 'ملف الأوردرات المراد تتبعها';
+  updateChkBtn();
+}
+function updateChkBtn() {
+  const manual = document.getElementById('manualOrders').value.trim();
+  const hasOrders = lcData || manual.length > 5;
+  document.getElementById('chkBtn').disabled = !refData || !hasOrders;
+}
+document.getElementById('manualOrders').addEventListener('input', updateChkBtn);
+
+function classifyStatus(status) {
+  if (!status) return 'not_found';
+  const s = status.toLowerCase();
+  if (s.includes('delivered')) return 'Delivered';
+  if (s.includes('arrived'))   return 'Arrived';
+  if (s.includes('returned'))  return 'Returned';
+  return 'other';
+}
+
+function runStatusCheck() {
+  if (!refData) { alert('ارفع ملف المرجع أولاً'); return; }
+
+  // Build orders list: from LC file or manual input
+  let orders = [];
+  if (lcData && lcData.length) {
+    orders = lcData.map(d => ({ orderNo: d.orderNo, orderType: d.orderType }));
+  }
+  // Add manual orders
+  const manual = document.getElementById('manualOrders').value.trim();
+  if (manual) {
+    manual.split('\n').forEach(line => {
+      const on = line.trim().replace(/\s+/g,'');
+      if (on && /\d{3}-\d{3}-\d{3}/.test(on)) {
+        if (!orders.find(o => o.orderNo === on)) orders.push({ orderNo: on, orderType: '' });
+      }
+    });
+  }
+
+  if (!orders.length) { alert('لا توجد أوردرات للبحث'); return; }
+
+  // Build results
+  chkResults = orders.map(o => {
+    const rec = refData.get(o.orderNo) || null;
+    return {
+      orderNo:       o.orderNo,
+      orderType:     o.orderType,
+      status:        rec ? rec.status : '',
+      statusClass:   rec ? classifyStatus(rec.status) : 'not_found',
+      receiveDate:   rec ? rec.receiveDate   : '',
+      deliveredDate: rec ? rec.deliveredDate : '',
+      dept:          rec ? rec.dept          : '',
+      otp:           rec ? rec.otp           : '',
+      remark:        rec ? rec.remark        : '',
+      sheet:         rec ? rec.sheet         : ''
+    };
+  });
+
+  // Stats
+  const delivered  = chkResults.filter(r => r.statusClass === 'Delivered').length;
+  const arrived    = chkResults.filter(r => r.statusClass === 'Arrived').length;
+  const notFound   = chkResults.filter(r => r.statusClass === 'not_found').length;
+  const other      = chkResults.filter(r => r.statusClass !== 'Delivered' && r.statusClass !== 'Arrived' && r.statusClass !== 'not_found').length;
+
+  document.getElementById('chk-delivered').textContent = delivered;
+  document.getElementById('chk-arrived').textContent   = arrived;
+  document.getElementById('chk-notfound').textContent  = notFound;
+  document.getElementById('chk-other').textContent     = other;
+  document.getElementById('chk-total-lbl').textContent = `إجمالي: ${chkResults.length} أوردر`;
+
+  renderChkTable('all');
+  document.getElementById('chkRes').style.display = 'block';
+  document.getElementById('chkRes').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function filterChkTable() {
+  renderChkTable(document.getElementById('chkFilter').value);
+}
+
+const STATUS_COLORS = {
+  'Delivered': {bg:'rgba(16,185,129,.12)', color:'var(--green)', icon:'✅'},
+  'Arrived':   {bg:'rgba(14,165,233,.12)', color:'var(--accent)', icon:'🚛'},
+  'Returned':  {bg:'rgba(245,158,11,.12)', color:'var(--yellow)', icon:'↩️'},
+  'not_found': {bg:'rgba(239,68,68,.1)',  color:'var(--red)',    icon:'❌'},
+  'other':     {bg:'rgba(139,92,246,.1)', color:'#a78bfa',      icon:'⚠️'}
+};
+
+function renderChkTable(filter) {
+  const toShow = filter === 'all' ? chkResults :
+    filter === 'not_found' ? chkResults.filter(r => r.statusClass === 'not_found') :
+    filter === 'other'     ? chkResults.filter(r => !['Delivered','Arrived','not_found'].includes(r.statusClass)) :
+    chkResults.filter(r => r.status.toLowerCase().includes(filter.toLowerCase()));
+
+  const tbody = document.getElementById('chkBody');
+  tbody.innerHTML = '';
+  toShow.forEach((r, i) => {
+    const sc = STATUS_COLORS[r.statusClass] || STATUS_COLORS['other'];
+    const tr = document.createElement('tr');
+    tr.style.background = sc.bg;
+    const statusDisplay = r.statusClass === 'not_found'
+      ? `<span style="color:${sc.color};font-weight:700">${sc.icon} غير موجود</span>`
+      : `<span style="color:${sc.color};font-weight:700">${sc.icon} ${r.status}</span>`;
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:10px">${i+1}</td>
+      <td><strong style="font-family:'JetBrains Mono',monospace">${r.orderNo}</strong></td>
+      <td style="color:var(--muted)">${r.orderType||'—'}</td>
+      <td>${statusDisplay}</td>
+      <td style="font-size:11px">${r.receiveDate||'—'}</td>
+      <td style="font-size:11px">${r.deliveredDate||'—'}</td>
+      <td style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.dept}">${r.dept||'—'}</td>
+      <td style="font-size:11px">${r.otp||'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('chk-total-lbl').textContent = `إجمالي: ${chkResults.length} | معروض: ${toShow.length}`;
+}
+
+function downloadLcFormat() {
+  if (!chkResults.length) return;
+  const wb3 = XLSX.utils.book_new();
+  const BG='1A0810', WH='FFFFFF', GR='D5F5E3', RD='FADBD8', BL='D6EAF8', YL='FEF9E7';
+  const bdr={top:{style:'thin',color:{rgb:'E0D0D8'}},bottom:{style:'thin',color:{rgb:'E0D0D8'}},left:{style:'thin',color:{rgb:'E0D0D8'}},right:{style:'thin',color:{rgb:'E0D0D8'}}};
+  function cs(v,bold,fg,bg,hz){return{v:v==null?'':v,t:'s',s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Arial',sz:10},fill:{patternType:'solid',fgColor:{rgb:bg||WH}},alignment:{horizontal:hz||'center',vertical:'center'},border:bdr}};}
+
+  const wsData = [];
+  // Title
+  const t1=[cs('LC Orders Status Report — NUPCO AlUla',true,WH,BG,'center',13)];
+  for(let i=1;i<8;i++) t1.push(cs('',false,WH,BG)); wsData.push(t1);
+  // Sub-title date
+  const t2=[cs('Generated: '+new Date().toLocaleDateString('en-GB'),false,'FFB000','FFF8E7','center',10)];
+  for(let i=1;i<8;i++) t2.push(cs('',false,'FFB000','FFF8E7')); wsData.push(t2);
+  // Headers - same as LC file + extra columns
+  wsData.push([
+    cs('Store Order',true,WH,BG),
+    cs('Order Type',true,WH,BG),
+    cs('Status in AlUla',true,WH,BG),
+    cs('Receive Date',true,WH,BG),
+    cs('Delivered Date',true,WH,BG),
+    cs('Department',true,WH,BG),
+    cs('OTP',true,WH,BG),
+    cs('Remark',true,WH,BG)
+  ]);
+
+  chkResults.forEach((r,idx) => {
+    const sc = r.statusClass;
+    const bg = sc==='Delivered'?GR : sc==='Arrived'?BL : sc==='not_found'?RD : YL;
+    const statusDisplay = sc==='not_found' ? 'Not Found' : r.status;
+    wsData.push([
+      cs(r.orderNo,  true, '000000', bg),
+      cs(r.orderType,false,'000000', bg),
+      cs(statusDisplay, true, sc==='Delivered'?'1E8449':sc==='not_found'?'C0392B':'000000', bg),
+      cs(r.receiveDate,  false,'000000',bg),
+      cs(r.deliveredDate,false,'000000',bg),
+      cs(r.dept,         false,'000000',bg,'left'),
+      cs(r.otp,          false,'000000',bg),
+      cs(r.remark,       false,'000000',bg,'left')
+    ]);
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet(wsData.map(r=>r.map(c=>c.v)));
+  wsData.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws[a])ws[a].s=cell.s;}));
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+  ws['!cols']=[{wch:16},{wch:14},{wch:22},{wch:14},{wch:14},{wch:32},{wch:12},{wch:20}];
+  ws['!rows']=[{hpt:28},{hpt:18},{hpt:24}];
+  XLSX.utils.book_append_sheet(wb3, ws, 'LC Orders Status');
+
+  // Summary sheet
+  const stats = [
+    ['Delivered', chkResults.filter(r=>r.statusClass==='Delivered').length, GR],
+    ['Arrived',   chkResults.filter(r=>r.statusClass==='Arrived').length,   BL],
+    ['Not Found', chkResults.filter(r=>r.statusClass==='not_found').length, RD],
+    ['Other',     chkResults.filter(r=>!['Delivered','Arrived','not_found'].includes(r.statusClass)).length, YL],
+    ['Total',     chkResults.length, 'E8F4FD'],
+  ];
+  const sumD=[
+    [cs('Summary',true,WH,BG,'center',12),cs('',false,WH,BG),cs('',false,WH,BG)],
+    [cs('Status',true,WH,BG),cs('Count',true,WH,BG),cs('%',true,WH,BG)],
+    ...stats.map(([s,n,bg])=>[cs(s,true,'000000',bg),cs(n,true,'000000',bg),cs(chkResults.length?((n/chkResults.length*100).toFixed(1)+'%'):'0%',false,'000000',bg)])
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(sumD.map(r=>r.map(c=>c.v)));
+  sumD.forEach((row,ri)=>row.forEach((cell,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(ws2[a])ws2[a].s=cell.s;}));
+  ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:2}}];
+  ws2['!cols']=[{wch:18},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb3, ws2, 'Summary');
+
+  XLSX.writeFile(wb3, 'LC_Status_'+new Date().toISOString().slice(0,10)+'.xlsx', {cellStyles:true});
+}
+
+// ══════════════════════════════════════════════
+// توليد SUMMARY NUPCO
+// ══════════════════════════════════════════════
+const snFiles = { a25:null, m25:null, a26:null, m26:null };
+const MONTHS_SN = ['january','february','march','april','may','june',
+                   'july','august','september','october','november','december'];
+const MONTHS_DISPLAY = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+
+function snUpdateBtn() {
+  const loaded = Object.values(snFiles).filter(v=>v!==null).length;
+  document.getElementById('snBtn').disabled = loaded < 1;
+}
+
+function snClear(id) {
+  snFiles[id] = null;
+  document.getElementById('sn-fi-'+id).value = '';
+  document.getElementById('sn-slot-'+id).classList.remove('loaded');
+  document.getElementById('sn-cnt-'+id).textContent = '0';
+  const labels = {a25:'Alula Dispatched 2025',m25:'Madinah Received 2025',a26:'Alula Dispatched 2026',m26:'Madinah Received 2026'};
+  document.getElementById('sn-nm-'+id).textContent = labels[id];
+  snUpdateBtn();
+}
+
+async function snLoadFile(id, input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, {type:'array'});
+    const src  = id.startsWith('a') ? 'ALULA' : 'MADINAH';
+    const year = id.endsWith('25') ? '2025' : '2026';
+    const recs = snParseFile(wb, src, year);
+    snFiles[id] = recs;
+    document.getElementById('sn-slot-'+id).classList.add('loaded');
+    document.getElementById('sn-cnt-'+id).textContent = new Set(recs.map(r=>r.order)).size.toLocaleString();
+    document.getElementById('sn-nm-'+id).textContent = file.name.substring(0,22);
+    snUpdateBtn();
+  } catch(e) { alert('خطأ في قراءة الملف: ' + e.message); }
+}
+
+function snParseDate(val) {
+  if (!val) return null;
+  const s = String(val).trim();
+  const fmts = [
+    /^(\d{4})-(\d{2})-(\d{2})/, // YYYY-MM-DD
+    /^(\d{2})\.(\d{2})\.(\d{4})/, // DD.MM.YYYY
+    /^(\d{2})-(\d{2})-(\d{4})/, // DD-MM-YYYY
+    /^(\d{2})\/(\d{2})\/(\d{4})/, // DD/MM/YYYY
+  ];
+  for (const fmt of fmts) {
+    const m = s.match(fmt);
+    if (m) {
+      try {
+        if (fmt === fmts[0]) return new Date(m[1], m[2]-1, m[3]);
+        return new Date(m[3], m[2]-1, m[1]);
+      } catch(e) {}
+    }
+  }
+  // Excel serial number
+  if (/^\d{5}$/.test(s)) {
+    const d = new Date((parseInt(s) - 25569) * 86400 * 1000);
+    if (!isNaN(d)) return d;
+  }
+  return null;
+}
+
+function snMonthName(dt, sheetName) {
+  if (dt) {
+    const mn = dt.getMonth();
+    return MONTHS_DISPLAY[mn];
+  }
+  for (const m of MONTHS_DISPLAY) {
+    if (sheetName.trim().toLowerCase().startsWith(m.substring(0,3).toLowerCase())) return m;
+  }
+  return sheetName.trim();
+}
+
+function snIsRush(val) {
+  const v = String(val||'').trim().toUpperCase();
+  return ['RUSH','URGENT','HAZARDUS'].includes(v);
+}
+function snIsEmergency(val) {
+  const v = String(val||'').trim().toUpperCase();
+  return ['EMERGENCY','URGENT'].includes(v);
+}
+
+function snFindCol(headers, patterns) {
+  for (const [ci, h] of headers.entries()) {
+    const v = String(h||'').trim().toLowerCase().replace(/\s+/g,'');
+    for (const p of patterns) {
+      if (v.includes(p)) return ci;
+    }
+  }
+  return -1;
+}
+
+function snParseFile(wb, src, year) {
+  const recs = [];
+  for (const shName of wb.SheetNames) {
+    if (!MONTHS_SN.includes(shName.trim().toLowerCase())) continue;
+    const ws  = wb.Sheets[shName];
+    const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+    // Find header row
+    let hdrRi = -1, col = {};
+    for (let ri = 0; ri < Math.min(5, raw.length); ri++) {
+      const row = raw[ri];
+      const orderCI = snFindCol(row, ['orderno','ordernumber','ordernum','order_no']);
+      if (orderCI >= 0) {
+        hdrRi = ri;
+        col.order  = orderCI;
+        col.status = snFindCol(row, ['status']);
+        col.date   = src==='ALULA'
+          ? snFindCol(row, ['dispatcheddate','dispatched_date'])
+          : snFindCol(row, ['receivedate','receive_date','receivedate']);
+        col.lines  = snFindCol(row, ['orderline','order_line','line']);
+        col.qty    = snFindCol(row, ['dispatchedqty','dispatchedqty','totalqty','total_qty','qty']);
+        col.type   = snFindCol(row, ['ordertype','order_type']);
+        col.remark = snFindCol(row, ['remark']);
+        col.cust   = snFindCol(row, ['customername','customer_name','department','dept']);
+        break;
+      }
+    }
+    if (hdrRi < 0) continue;
+
+    for (let ri = hdrRi+1; ri < raw.length; ri++) {
+      const row = raw[ri];
+      const on = String(row[col.order]||'').trim();
+      if (!on || !/^\d{3}-\d{3}-\d{3}$/.test(on)) continue;
+
+      const dt = snParseDate(row[col.date >= 0 ? col.date : 7]);
+      const mo = snMonthName(dt, shName);
+      const otype  = String(row[col.type >= 0 ? col.type : 10]||'').trim();
+      const remark = String(row[col.remark >= 0 ? col.remark : 8]||'').trim();
+      const status = String(row[col.status >= 0 ? col.status : 1]||'').trim();
+      const lines  = parseFloat(row[col.lines >= 0 ? col.lines : 8]||0)||0;
+      const qty    = parseFloat(row[col.qty >= 0 ? col.qty : 9]||0)||0;
+      const cust   = String(row[col.cust >= 0 ? col.cust : 4]||'').trim();
+      const rushFlag = snIsRush(otype) || snIsRush(remark);
+      const emgFlag  = snIsEmergency(otype) || snIsEmergency(remark);
+
+      recs.push({ src, year, month:mo, order:on, status, type:otype||remark,
+                  rush:rushFlag, emg:emgFlag, lines, qty, cust, dt });
+    }
+  }
+  return recs;
+}
+
+// ── Build Excel ──────────────────────────────────────────────────
+const SN_DARK='2D0A1E', SN_PINK='C4216A', SN_LPINK='F5E6ED';
+const SN_WHITE='FFFFFF', SN_ODD='FDF2F7', SN_EVEN='FFFFFF';
+const SN_YEL='FFF8DC', SN_GRN='D5F5E3';
+const snBdr={top:{style:'thin',color:{rgb:'E0C8D4'}},bottom:{style:'thin',color:{rgb:'E0C8D4'}},left:{style:'thin',color:{rgb:'E0C8D4'}},right:{style:'thin',color:{rgb:'E0C8D4'}}};
+
+function snCS(v, bold, fg, bg, hz, sz) {
+  return {v:v==null?'':v, t:typeof v==='number'?'n':'s',
+    s:{font:{bold:!!bold,color:{rgb:fg||'000000'},name:'Calibri',sz:sz||10},
+       fill:{patternType:'solid',fgColor:{rgb:bg||SN_WHITE}},
+       alignment:{horizontal:hz||'center',vertical:'center',wrapText:false},
+       border:snBdr}};
+}
+function snH(v, bg, fg, sz)  { return snCS(v,true, fg||SN_WHITE, bg||SN_DARK,'center',sz||10); }
+function snD(v, bg, bold, hz){ return snCS(v,!!bold,'000000',bg||SN_WHITE,hz||'center'); }
+function snTitle(cols, val, bg, sz) {
+  const row = [snCS(val,true,SN_WHITE,bg||SN_DARK,'center',sz||13)];
+  for(let i=1;i<cols;i++) row.push(snCS('',false,SN_WHITE,bg||SN_DARK));
+  return row;
+}
+function snApply(ws, wsData) {
+  wsData.forEach((row,ri)=>row.forEach((cell,ci)=>{
+    const a=XLSX.utils.encode_cell({r:ri,c:ci});
+    if(ws[a]) ws[a].s=cell.s;
+  }));
+}
+function snMerge(wsData, r1, c1, r2, c2) {
+  return {s:{r:r1,c:c1},e:{r:r2,c:c2}};
+}
+
+function runSummaryGen() {
+  const all = [];
+  if (snFiles.a25) all.push(...snFiles.a25);
+  if (snFiles.m25) all.push(...snFiles.m25);
+  if (snFiles.a26) all.push(...snFiles.a26);
+  if (snFiles.m26) all.push(...snFiles.m26);
+
+  if (!all.length) { alert('لا توجد بيانات'); return; }
+
+  const alu = all.filter(r=>r.src==='ALULA');
+  const mad = all.filter(r=>r.src==='MADINAH');
+  const rush = all.filter(r=>r.rush);
+  const uniqAll  = new Set(all.map(r=>r.order)).size;
+  const uniqAlu  = new Set(alu.map(r=>r.order)).size;
+  const uniqMad  = new Set(mad.map(r=>r.order)).size;
+  const uniqRush = new Set(rush.map(r=>r.order)).size;
+
+  document.getElementById('sn-total').textContent = uniqAll.toLocaleString();
+  document.getElementById('sn-alula').textContent = uniqAlu.toLocaleString();
+  document.getElementById('sn-mad').textContent   = uniqMad.toLocaleString();
+  document.getElementById('sn-rush').textContent  = uniqRush.toLocaleString();
+
+  window._snData = { all, alu, mad, rush };
+  document.getElementById('snRes').style.display = 'block';
+  document.getElementById('snRes').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function snGetMonthStats(aluRecs, madRecs, year, month) {
+  const a = aluRecs.filter(r=>r.year===year && r.month===month);
+  const m = madRecs.filter(r=>r.year===year && r.month===month);
+  const allR = [...a, ...m];
+  const normalSet = new Set(allR.filter(r=>!r.rush&&!r.emg).map(r=>r.order));
+  const emgSet    = new Set(allR.filter(r=>r.rush||r.emg).map(r=>r.order));
+  const allSet    = new Set(allR.map(r=>r.order));
+  const dlvSet    = new Set(allR.filter(r=>r.status.toLowerCase().includes('delivered')).map(r=>r.order));
+  return {normal:normalSet.size, emg:emgSet.size, total:allSet.size, delivered:dlvSet.size};
+}
+
+function downloadSummaryNupco() {
+  const { all, alu, mad, rush } = window._snData || {};
+  if (!all) return;
+
+  const wb2 = XLSX.utils.book_new();
+  const today = new Date().toLocaleDateString('en-GB');
+  const todayISO = new Date().toISOString().slice(0,10);
+
+  // ── TODAY ────────────────────────────────────────────────────
+  const ws1data = [];
+  const NCOLS_T = 8;
+  // Get latest year/month
+  const years = [...new Set(all.map(r=>r.year))].sort();
+  const lastYear = years[years.length-1];
+  const monthsInLastYear = [...new Set(all.filter(r=>r.year===lastYear).map(r=>r.month))];
+  const lastMonth = MONTHS_DISPLAY.filter(m=>monthsInLastYear.includes(m)).pop() || monthsInLastYear[0];
+  const todayAlu = alu.filter(r=>r.year===lastYear&&r.month===lastMonth);
+  const todayMad = mad.filter(r=>r.year===lastYear&&r.month===lastMonth);
+
+  ws1data.push(snTitle(NCOLS_T,'📦 Today Orders Summary — NUPCO AlUla & Madinah',SN_DARK,14));
+  ws1data.push(snTitle(NCOLS_T,'',SN_DARK,14));
+  ws1data.push(snTitle(NCOLS_T,'Date: '+today+'  |  Latest Month: '+lastMonth+' '+lastYear,SN_LPINK,10).map((c,i)=>i===0?{...c,s:{...c.s,font:{...c.s.font,color:{rgb:SN_PINK}}}}:c));
+  ws1data.push(Array(NCOLS_T).fill(snD('',SN_WHITE)));
+
+  ws1data.push([snD('',SN_DARK), snH('Customers'), snH('Normal Orders'), snH('Emergency Orders'),
+                snH('Total Orders'), snH('Total Trips'), snH('Pending Per Delivery Plan'), snH('Reasons')]);
+
+  const aN = new Set(todayAlu.filter(r=>!r.rush&&!r.emg).map(r=>r.order)).size;
+  const aE = new Set(todayAlu.filter(r=>r.rush||r.emg).map(r=>r.order)).size;
+  const aT = new Set(todayAlu.map(r=>r.order)).size;
+  const mN = new Set(todayMad.filter(r=>!r.rush&&!r.emg).map(r=>r.order)).size;
+  const mE = new Set(todayMad.filter(r=>r.rush||r.emg).map(r=>r.order)).size;
+  const mT = new Set(todayMad.map(r=>r.order)).size;
+
+  [[`ALULA Hospital (${lastMonth})`,aN,aE,aT,'',0,0,SN_ODD],
+   [`Madina Orders (${lastMonth})`,mN,mE,mT,'',0,0,SN_EVEN],
+   ['Grand Total',aN+mN,aE+mE,aT+mT,'',0,0,SN_LPINK]
+  ].forEach(([nm,n,e,t,_,pend,reas,bg],idx)=>{
+    ws1data.push([snD('',bg), snD(nm,bg,idx===2,'left'), snD(n,bg,idx===2), snD(e,bg,idx===2),
+                  snD(t,bg,idx===2), snD('يدوي',SN_YEL), snD(pend,bg), snD(reas,bg)]);
+  });
+
+  ws1data.push(Array(NCOLS_T).fill(snD('',SN_WHITE)));
+  ws1data.push(snTitle(NCOLS_T,'Order List — '+lastMonth+' '+lastYear,SN_PINK,11));
+  ws1data.push([snD('',SN_DARK), snH('Order Number'), snH('Customer/Dept'), snH('City'),
+                snH('Order Type'), snH('Status'), snD('',SN_DARK), snD('',SN_DARK)]);
+
+  const todayOrders = [...new Map([...todayAlu,...todayMad].map(r=>[r.order,r])).values()];
+  todayOrders.sort((a,b)=>a.order.localeCompare(b.order));
+  todayOrders.forEach((r,i)=>{
+    const bg = i%2===0?SN_ODD:SN_EVEN;
+    ws1data.push([snD('',bg), snD(r.order,bg,true), snD(r.cust.substring(0,35),bg,false,'left'),
+                  snD(r.src,bg), snD(r.type||'Normal',bg), snD(r.status,bg), snD('',bg), snD('',bg)]);
+  });
+
+  const ws1 = XLSX.utils.aoa_to_sheet(ws1data.map(r=>r.map(c=>c.v)));
+  snApply(ws1, ws1data);
+  ws1['!merges']=[snMerge(ws1data,0,0,1,NCOLS_T-1),snMerge(ws1data,2,0,2,NCOLS_T-1),
+                  snMerge(ws1data,3,0,3,NCOLS_T-1)];
+  ws1['!cols']=[{wch:4},{wch:28},{wch:16},{wch:16},{wch:14},{wch:12},{wch:18},{wch:14}];
+  ws1['!rows']=[{hpt:22},{hpt:22},{hpt:18}];
+  XLSX.utils.book_append_sheet(wb2,ws1,'Today');
+
+  // ── SUMMARY ─────────────────────────────────────────────────
+  const NCOLS_S = 9;
+  const ws2data = [];
+  ws2data.push(snTitle(NCOLS_S,'📊 Monthly Summary — NUPCO AlUla & Madinah Orders',SN_DARK,14));
+  ws2data.push(snTitle(NCOLS_S,'',SN_DARK));
+  ws2data.push(Array(NCOLS_S).fill(snD('',SN_WHITE)));
+  ws2data.push([snD('',SN_DARK), snH('Year'), snH('Month/Date'), snH('Planned Orders'),
+                snH('Emergency Orders'), snH('Prepared orders'), snH('Dispatched orders'),
+                snH('Orders FR %'), snH('Delivered')]);
+
+  const summaryRows = [];
+
+  // استخرج الأشهر الفعلية الموجودة في البيانات فقط — بالترتيب الصحيح
+  const monthOrder = ['January','February','March','April','May','June',
+                      'July','August','September','October','November','December'];
+
+  const yearsPresent = [...new Set(all.map(r=>r.year))].sort();
+  let grandN=0, grandE=0, grandT=0, grandD=0;
+
+  yearsPresent.forEach(yr=>{
+    // فقط الأشهر اللي فيها بيانات فعلية لهذه السنة
+    const monthsWithData = monthOrder.filter(m=>
+      all.some(r=>r.year===yr && r.month===m)
+    );
+    monthsWithData.forEach(mo=>{
+      const s = snGetMonthStats(alu,mad,yr,mo);
+      if(s.total>0) summaryRows.push({yr,mo,n:s.normal,e:s.emg,t:s.total,d:s.delivered});
+      grandN+=s.normal; grandE+=s.emg; grandT+=s.total; grandD+=s.delivered;
+    });
+  });
+
+  let prevYear='';
+  summaryRows.forEach((row,i)=>{
+    const bg = i%2===0?SN_ODD:SN_EVEN;
+    const yd = row.yr!==prevYear?row.yr:''; prevYear=row.yr;
+    ws2data.push([snD('',bg), snD(yd,bg,yd!=='','center'), snD(row.mo,bg), snD(row.n,bg),
+                  snD(row.e,bg), snD(row.n+row.e,bg), snD(row.t,bg), snD('100%',bg), snD(row.d,bg)]);
+  });
+  ws2data.push([snD('',SN_LPINK), snD('Grand Total',SN_LPINK,true), snD('',SN_LPINK),
+                snD(grandN,SN_LPINK,true), snD(grandE,SN_LPINK,true), snD(grandN+grandE,SN_LPINK,true),
+                snD(grandT,SN_LPINK,true), snD('100%',SN_LPINK,true), snD(grandD,SN_LPINK,true)]);
+
+  const ws2 = XLSX.utils.aoa_to_sheet(ws2data.map(r=>r.map(c=>c.v)));
+  snApply(ws2,ws2data);
+  ws2['!merges']=[snMerge(ws2data,0,0,1,NCOLS_S-1)];
+  ws2['!cols']=[{wch:4},{wch:10},{wch:16},{wch:16},{wch:18},{wch:16},{wch:18},{wch:12},{wch:14}];
+  ws2['!rows']=[{hpt:22},{hpt:22}];
+  XLSX.utils.book_append_sheet(wb2,ws2,'Summary');
+
+  // ── GRAND TOTAL ──────────────────────────────────────────────
+  const NCOLS_G = 12;
+  const ws3data = [];
+  ws3data.push(snTitle(NCOLS_G,'📈 Grand Total — NUPCO AlUla & Madinah 2025 / 2026',SN_DARK,14));
+  ws3data.push(snTitle(NCOLS_G,'',SN_DARK));
+
+  function buildGTBlock(aluRecs, madRecs, year) {
+    const rows = [];
+    rows.push(snTitle(NCOLS_G, year, SN_PINK, 12));
+    rows.push([snD('',SN_DARK), snH('Departments'), snH('Normal Orders'), snH('Emergency'),
+               snH('% Emergency'), snH('Total Orders'), snH('% Departments'),
+               snH('Total Trips'), snH('Total SKUs (QTY)'), snH('Total Lines'),
+               snH('Total Units'), snD('',SN_DARK)]);
+
+    const aN2 = new Set(aluRecs.filter(r=>!r.rush&&!r.emg).map(r=>r.order)).size;
+    const aE2 = new Set(aluRecs.filter(r=>r.rush||r.emg).map(r=>r.order)).size;
+    const aT2 = aN2+aE2;
+    const aLines = aluRecs.reduce((s,r)=>s+r.lines,0);
+    const aQty   = aluRecs.reduce((s,r)=>s+r.qty,0);
+    const mN2 = new Set(madRecs.filter(r=>!r.rush&&!r.emg).map(r=>r.order)).size;
+    const mE2 = new Set(madRecs.filter(r=>r.rush||r.emg).map(r=>r.order)).size;
+    const mT2 = mN2+mE2;
+    const mLines = madRecs.reduce((s,r)=>s+r.lines,0);
+    const mQty   = madRecs.reduce((s,r)=>s+r.qty,0);
+    const gt = aT2+mT2;
+
+    [[`ALULA Hospital`,aN2,aE2,aT2,aT2/Math.max(gt,1),Math.round(aQty),Math.round(aLines),SN_ODD],
+     [`Madina Orders`, mN2,mE2,mT2,mT2/Math.max(gt,1),Math.round(mQty),Math.round(mLines),SN_EVEN],
+    ].forEach(([nm,n,e,t,pct,qty,lines,bg])=>{
+      const ePct = t>0?(e/t*100).toFixed(0)+'%':'0%';
+      const dPct = (pct*100).toFixed(0)+'%';
+      rows.push([snD('',bg), snD(nm,bg,true,'left'), snD(n,bg), snD(e,bg), snD(ePct,bg),
+                 snD(t,bg), snD(dPct,bg), snCS('يدوي',false,'997700',SN_YEL,'center'),
+                 snD(qty,bg), snD(lines,bg), snD('',bg), snD('',bg)]);
+    });
+
+    const gtN=aN2+mN2, gtE=aE2+mE2, gtT=aT2+mT2;
+    const gtEPct = gtT>0?(gtE/gtT*100).toFixed(0)+'%':'0%';
+    rows.push([snD('',SN_LPINK), snD('Grand Total',SN_LPINK,true), snD(gtN,SN_LPINK,true),
+               snD(gtE,SN_LPINK,true), snD(gtEPct,SN_LPINK,true), snD(gtT,SN_LPINK,true),
+               snD('100%',SN_LPINK,true), snCS('يدوي',true,'997700',SN_YEL,'center'),
+               snD(Math.round(aQty+mQty),SN_LPINK,true), snD(Math.round(aLines+mLines),SN_LPINK,true),
+               snD(0,SN_LPINK,true), snD('',SN_LPINK)]);
+    return rows;
+  }
+
+  const alu25 = snFiles.a25||[]; const mad25 = snFiles.m25||[];
+  const alu26 = snFiles.a26||[]; const mad26 = snFiles.m26||[];
+
+  if(alu25.length||mad25.length) { ws3data.push(Array(NCOLS_G).fill(snD('',SN_WHITE))); buildGTBlock(alu25,mad25,'2025').forEach(r=>ws3data.push(r)); }
+  if(alu26.length||mad26.length) { ws3data.push(Array(NCOLS_G).fill(snD('',SN_WHITE))); buildGTBlock(alu26,mad26,'2026').forEach(r=>ws3data.push(r)); }
+
+  ws3data.push(Array(NCOLS_G).fill(snD('',SN_WHITE)));
+  ws3data.push(snTitle(NCOLS_G,'🟡 الخلايا الصفراء (Total Trips) تعبّأ يدوياً',SN_YEL,9).map((c,i)=>i===0?{...c,s:{...c.s,font:{...c.s.font,color:{rgb:'997700'},bold:false,italic:true}}}:c));
+
+  const ws3 = XLSX.utils.aoa_to_sheet(ws3data.map(r=>r.map(c=>c.v)));
+  snApply(ws3,ws3data);
+  ws3['!cols']=[{wch:4},{wch:20},{wch:16},{wch:14},{wch:13},{wch:14},{wch:14},{wch:14},{wch:16},{wch:14},{wch:14},{wch:6}];
+  XLSX.utils.book_append_sheet(wb2,ws3,'Grand Total');
+
+  // ── ORDER RUSH ───────────────────────────────────────────────
+  const NCOLS_R = 9;
+  const ws4data = [];
+  ws4data.push(snTitle(NCOLS_R,'🚨 Order Rush / Urgent — NUPCO AlUla & Madinah','8B0000',14));
+  ws4data.push(snTitle(NCOLS_R,'','8B0000'));
+  ws4data.push([snD('',SN_DARK), snH('Order Number'), snH('Status'), snH('Customer / Dept'),
+                snH('City'), snH('Year'), snH('Month'), snH('Date'), snH('Order Type')]);
+
+  const rushSeen = new Map();
+  [...all].filter(r=>r.rush).forEach(r=>{ if(!rushSeen.has(r.order)) rushSeen.set(r.order,r); });
+  const rushList = [...rushSeen.values()].sort((a,b)=>(a.year+a.month).localeCompare(b.year+b.month));
+  rushList.forEach((r,i)=>{
+    const bg = i%2===0?'FFF5F5':SN_WHITE;
+    const ds = r.dt ? (r.dt.getDate()+'/'+(r.dt.getMonth()+1)+'/'+r.dt.getFullYear()) : '';
+    ws4data.push([snD('',bg), snD(r.order,bg,true), snD(r.status,bg), snD(r.cust.substring(0,35),bg,false,'left'),
+                  snD(r.src,bg), snD(r.year,bg), snD(r.month,bg), snD(ds,bg), snD(r.type||'RUSH',bg)]);
+  });
+  ws4data.push(Array(NCOLS_R).fill(snD('',SN_WHITE)));
+  ws4data.push(snTitle(NCOLS_R,'إجمالي أوردرات Rush / Urgent: '+rushList.length,'FFF0F0',11).map((c,i)=>i===0?{...c,s:{...c.s,font:{...c.s.font,color:{rgb:'8B0000'},bold:true}}}:c));
+
+  const ws4 = XLSX.utils.aoa_to_sheet(ws4data.map(r=>r.map(c=>c.v)));
+  snApply(ws4,ws4data);
+  ws4['!merges']=[snMerge(ws4data,0,0,1,NCOLS_R-1)];
+  ws4['!cols']=[{wch:4},{wch:18},{wch:16},{wch:35},{wch:12},{wch:8},{wch:14},{wch:14},{wch:18}];
+  ws4['!rows']=[{hpt:22},{hpt:22}];
+  XLSX.utils.book_append_sheet(wb2,ws4,'Order Rush');
+
+  XLSX.writeFile(wb2,'SUMMARY_NUPCO_'+todayISO+'.xlsx',{cellStyles:true});
+}
+</script>
+</body>
+</html>
