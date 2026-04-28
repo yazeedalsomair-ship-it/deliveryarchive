@@ -652,14 +652,52 @@ async function extract(file){
   const b=await b64(file);
   const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':location.href,'X-Title':'NUPCO Invoice Archiver'},
-    body:JSON.stringify({model,max_tokens:1000,messages:[{role:'user',content:[
+    body:JSON.stringify({model,max_tokens:4000,messages:[{role:'user',content:[
       {type:'image_url',image_url:{url:'data:'+(file.type||'image/jpeg')+';base64,'+b}},
       {type:'text',text:PROMPT}]}]})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+res.status);}
   const data=await res.json();
   let txt=data.choices?.[0]?.message?.content||'{}';
+
+  // ── تنظيف الاستجابة ──
+  // إزالة علامات markdown
   txt=txt.replace(/```json\s*|\s*```/g,'').trim();
-  const p=JSON.parse(txt);
+
+  // استخراج كائن JSON فقط من النص (يتجاهل أي نص قبل أو بعد)
+  const jsonMatch=txt.match(/\{[\s\S]*\}/);
+  if(!jsonMatch)throw new Error('لم يتم العثور على JSON في استجابة النموذج');
+  txt=jsonMatch[0];
+
+  // ── إصلاح الأسطر الجديدة داخل القيم النصية ──
+  // نمرر حرف بحرف: إذا كنا داخل نص "..." ونواجه سطر جديد فعلي نستبدله بمسافة
+  let fixed='',inStr=false,esc=false;
+  for(let i=0;i<txt.length;i++){
+    const ch=txt[i];
+    if(esc){fixed+=ch;esc=false;continue;}
+    if(ch==='\\'){fixed+=ch;esc=true;continue;}
+    if(ch==='"'){inStr=!inStr;fixed+=ch;continue;}
+    if(inStr&&(ch==='\n'||ch==='\r')){fixed+=' ';continue;}
+    fixed+=ch;
+  }
+
+  let p;
+  try{
+    p=JSON.parse(fixed);
+  }catch(e1){
+    // محاولة ثانية: إزالة كل الأسطر الجديدة
+    try{
+      p=JSON.parse(fixed.replace(/\n/g,' ').replace(/\r/g,''));
+    }catch(e2){
+      // محاولة ثالثة: بناء كائن فارغ مع القيم المستخرجة يدوياً
+      const fallback={};
+      KEYS.forEach(k=>{if(k.startsWith('_'))return;const m=fixed.match(new RegExp('"'+k+'"\\s*:\\s*"([^"]*)"'));fallback[k]=m?m[1]:'';});
+      if(!Object.values(fallback).some(v=>v)){
+        throw new Error('فشل تحليل JSON: '+e1.message);
+      }
+      p=fallback;
+    }
+  }
+
   const now=new Date();
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   p._file=file.name;p._date=now.toLocaleDateString('en-GB');
