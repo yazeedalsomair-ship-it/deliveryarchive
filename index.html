@@ -211,14 +211,16 @@ document.getElementById('archiveInput').addEventListener('change',async function
 
 function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
 
-// دالة الاستخراج مع ميزة "المحاولة التلقائية" عند الخطأ (تعديل لتجنب انقطاع السيرفر)
+// دالة الاستخراج مع ميزة "المحاولة التلقائية" وحل مشكلة الحروف العربية في المسار
 async function extract(file, retries = 3) {
   const key = document.getElementById('apiKey').value.trim();
   const model = document.getElementById('mdl') ? document.getElementById('mdl').value : 'google/gemini-2.0-flash-001';
   if (!key) throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
   
   const b = await b64(file);
-  const refererUrl = location.href.startsWith('file:') ? 'https://nupco-archive.local' : location.href;
+  
+  // التعديل هنا: تثبيت رابط وهمي نظيف بالإنجليزية دائماً لتجنب خطأ Invalid value
+  const refererUrl = 'https://nupco-archive.local';
   
   for (let i = 0; i < retries; i++) {
     try {
