@@ -224,12 +224,16 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════
+     قسم مقارنة الملفات
+══════════════════════════════════════════════ -->
 <div class="wrap">
   <div class="cmp-sec">
     <div class="cmp-title">⚖️ مقارنة الأرشيف بين الفروع</div>
     <div class="cmp-sub">ارفع ثلاثة ملفات Excel ليقارن بينهم حسب رقم الأوردر — من عنده ومن ماعنده</div>
 
     <div class="cmp-uploads">
+      <!-- الأرشيف الرئيسي -->
       <div>
         <label class="cmp-slot" id="slot-arch">
           <input type="file" id="fi-arch" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('arch',this)"/>
@@ -245,6 +249,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
           <div class="manual-count" id="mcount-arch"></div>
         </div>
       </div>
+      <!-- العلا -->
       <div>
         <label class="cmp-slot" id="slot-ula">
           <input type="file" id="fi-ula" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('ula',this)"/>
@@ -260,6 +265,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
           <div class="manual-count" id="mcount-ula"></div>
         </div>
       </div>
+      <!-- المدينة -->
       <div>
         <label class="cmp-slot" id="slot-mad">
           <input type="file" id="fi-mad" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadSlot('mad',this)"/>
@@ -281,8 +287,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       ⚖️ قارن الآن
     </button>
 
+    <!-- Results -->
     <div class="cmp-res" id="cmpRes">
 
+      <!-- KPI cards -->
       <div class="cmp-kpi">
         <div class="cmp-kcard ck-arch">
           <span class="ck-ico">📦</span>
@@ -304,6 +312,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         </div>
       </div>
 
+      <!-- Unique per file -->
       <div class="cmp-venn">
         <div class="vbox">
           <h4><span style="color:#f59e0b">●</span> موجود في الأرشيف فقط</h4>
@@ -319,8 +328,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         </div>
       </div>
 
+      <!-- Full overlap table -->
       <div class="ov-table-wrap">
         <div class="ov-table-title" id="cmpTableTitle">📋 جدول مقارنة كامل — كل الأوردرات</div>
+        <!-- Filter buttons -->
         <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <span style="font-size:11px;color:var(--muted);margin-left:4px">عرض:</span>
           <button class="flt-btn active" data-f="all"  onclick="renderTable('all')">الكل</button>
@@ -353,11 +364,15 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════
+     قسم دمج ملفات الأرشيف
+══════════════════════════════════════════════ -->
 <div class="wrap">
   <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
     <div class="cmp-title">🗂️ دمج ملفات الأرشيف</div>
     <div class="cmp-sub">ارفع عدة ملفات Excel أرشيف وادمجهم في ملف واحد — يحذف التكرار برقم الأوردر تلقائياً</div>
 
+    <!-- Drop zone للملفات -->
     <label class="merge-drop" id="mergeDrop">
       <input type="file" id="mergeInput" accept=".xlsx,.xls,.csv" multiple style="display:none" onchange="addMergeFiles(this)"/>
       <span style="font-size:36px;display:block;margin-bottom:10px;filter:drop-shadow(0 0 8px rgba(14,165,233,.4))">📂</span>
@@ -365,6 +380,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       <div style="font-size:12px;color:var(--muted)">xlsx · xls · csv · عدة ملفات مع بعض</div>
     </label>
 
+    <!-- قائمة الملفات المضافة -->
     <div id="mergeFileList" style="display:none;margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:13px;font-weight:600;">الملفات المضافة <span id="mergeCount" style="background:var(--accent);color:white;border-radius:12px;padding:1px 8px;font-size:11px;font-family:'JetBrains Mono',monospace">0</span></span>
@@ -373,6 +389,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       <div id="mergeFileItems" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
 
+    <!-- خيارات -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
         <input type="checkbox" id="mergeDedupe" checked style="width:16px;height:16px;accent-color:var(--accent)"/>
@@ -388,6 +405,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       🗂️ دمج الملفات الآن
     </button>
 
+    <!-- نتيجة الدمج -->
     <div id="mergeRes" style="display:none;">
       <div class="srow" style="margin-bottom:16px;">
         <div class="sc tot"><span class="sv" id="mTotal">0</span><span class="sl">إجمالي السجلات</span></div>
@@ -414,12 +432,16 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
 .merge-file-item .mf-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0;}
 </style>
 
+<!-- ══════════════════════════════════════════════
+     قسم التحقق من حالة الأوردرات
+══════════════════════════════════════════════ -->
 <div class="wrap">
   <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
     <div class="cmp-title">🔍 التحقق من حالة الأوردرات</div>
     <div class="cmp-sub">ارفع ملف المدينة (أو أي ملف مرجعي) وملف LC — يبحث عن كل أوردر ويحدد حالته تلقائياً</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <!-- ملف المدينة -->
       <label class="cmp-slot" id="slot-ref" style="border-color:rgba(139,92,246,.4);">
         <input type="file" id="fi-ref" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadRefFile(this)"/>
         <span class="slot-count" id="count-ref" style="background:#8b5cf6;">0</span>
@@ -428,6 +450,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         <div class="slot-lbl" style="color:#a78bfa;">ملف المرجع (المدينة)</div>
         <div class="slot-sub" id="name-ref">ملف به حالات الأوردرات</div>
       </label>
+      <!-- ملف LC -->
       <label class="cmp-slot" id="slot-lc" style="border-color:rgba(245,158,11,.4);">
         <input type="file" id="fi-lc" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadLcFile(this)"/>
         <span class="slot-count" id="count-lc" style="background:#f59e0b;">0</span>
@@ -438,6 +461,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       </label>
     </div>
 
+    <!-- أو اكتب أرقام يدوي -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;">
       <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;">✏️ أو اكتب أرقام الأوردرات يدوياً (سطر لكل رقم)</div>
       <textarea id="manualOrders" placeholder="095-690-564&#10;095-694-240&#10;095-784-663" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical;min-height:90px;"></textarea>
@@ -447,7 +471,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
       🔍 ابحث عن الحالات
     </button>
 
+    <!-- النتائج -->
     <div id="chkRes" style="display:none;">
+      <!-- Stats -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;" id="chk-grid">
         <div class="sc" style="border-color:rgba(16,185,129,.3)"><span class="sv" id="chk-delivered" style="color:var(--green)">0</span><span class="sl">Delivered ✓</span></div>
         <div class="sc" style="border-color:rgba(14,165,233,.3)"><span class="sv" id="chk-arrived" style="color:var(--accent)">0</span><span class="sl">Arrived 🚛</span></div>
@@ -455,10 +481,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         <div class="sc" style="border-color:rgba(245,158,11,.3)"><span class="sv" id="chk-other" style="color:var(--yellow)">0</span><span class="sl">حالة أخرى</span></div>
       </div>
 
+      <!-- Table -->
       <div class="ov-table-wrap" style="margin-bottom:16px;">
         <div style="padding:12px 16px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
           🔍 نتيجة البحث
           <span id="chk-total-lbl" style="font-size:11px;color:var(--muted);font-weight:400;margin-right:auto;"></span>
+          <!-- Filter -->
           <select id="chkFilter" onchange="filterChkTable()" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--text);font-family:inherit;font-size:11px;cursor:pointer;">
             <option value="all">الكل</option>
             <option value="Delivered">Delivered</option>
@@ -484,6 +512,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
         </div>
       </div>
 
+      <!-- Download LC format -->
       <button class="dlbtn btn-drive" onclick="downloadLcFormat()" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;padding:14px;font-size:15px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;">
         📥 تحميل بصيغة ملف LC Orders (مع الحالات)
       </button>
@@ -491,11 +520,15 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════
+     قسم توليد SUMMARY NUPCO
+══════════════════════════════════════════════ -->
 <div class="wrap">
   <div class="cmp-sec" style="border-top:1px solid var(--border);padding-top:28px;margin-top:8px;">
     <div class="cmp-title">📊 توليد ملف SUMMARY NUPCO</div>
     <div class="cmp-sub">ارفع ملفات العلا والمدينة (2025 و2026) ويولّد لك ملف Excel كامل — Today + Summary + Grand Total + Order Rush</div>
 
+    <!-- ملفات الرفع - شبكة 2x2 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
 
       <label class="cmp-slot" id="sn-slot-a25">
@@ -536,14 +569,17 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(14,165,233,.04)
 
     </div>
 
+    <!-- ملاحظة: على الأقل ملفين -->
     <div style="font-size:11px;color:var(--muted);margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
       💡 ارفع ما عندك — مثلاً العلا 2026 + المدينة 2026 فقط. كل ملف اختياري ما عدا واحد على الأقل.
     </div>
 
+    <!-- زر التوليد -->
     <button class="cmp-btn" id="snBtn" disabled onclick="runSummaryGen()" style="background:linear-gradient(135deg,#2D0A1E,#C4216A);">
       📊 توليد ملف SUMMARY NUPCO
     </button>
 
+    <!-- نتيجة -->
     <div id="snRes" style="display:none;">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
         <div class="sc"><span class="sv" id="sn-total" style="color:var(--accent)">0</span><span class="sl">إجمالي الأوردرات</span></div>
@@ -566,7 +602,7 @@ const PROMPT='Extract these fields from this Goods Delivery Note image. Return O
 
 const uz=document.getElementById('upzone');
 uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('over');});
-uz.addEventListener('dragleave',()=>uz.classList.remove('over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('over'));
 uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('over');addImgs([...e.dataTransfer.files]);});
 document.getElementById('fileInput').addEventListener('change',e=>addImgs([...e.target.files]));
 
@@ -607,154 +643,28 @@ document.getElementById('archiveInput').addEventListener('change',async function
   }catch(err){alert('خطأ: '+err.message);}
 });
 
-// 1. دالة تصغير وضغط الصور (لحل مشكلة انقطاع الاتصال للملفات الكبيرة وتسريع الرفع)
-function compressImage(file, maxSizeKB) {
-  maxSizeKB = maxSizeKB || 800;
-  return new Promise(function(resolve) {
-    var img = new Image();
-    var url = URL.createObjectURL(file);
-    img.onload = function() {
-      URL.revokeObjectURL(url);
-      var MAX_W = 1600, MAX_H = 2000;
-      var w = img.width, h = img.height;
-      if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
-      if (h > MAX_H) { w = w * (MAX_H / h); h = MAX_H; }
-      var canvas = document.createElement('canvas');
-      canvas.width = Math.round(w);
-      canvas.height = Math.round(h);
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      var quality = 0.85;
-      var tryCompress = function() {
-        var dataUrl = canvas.toDataURL('image/jpeg', quality);
-        var sizeKB = Math.round((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4 / 1024);
-        if (sizeKB > maxSizeKB && quality > 0.3) {
-          quality -= 0.15;
-          return tryCompress();
-        }
-        return dataUrl;
-      };
-      resolve(tryCompress());
-    };
-    img.onerror = function() {
-      URL.revokeObjectURL(url);
-      var reader = new FileReader();
-      reader.onload = function() { resolve(reader.result); };
-      reader.readAsDataURL(file);
-    };
-    img.src = url;
-  });
-}
+function b64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
 
-function b64(file) {
-  return compressImage(file, 800).then(function(dataUrl) {
-    return dataUrl.split(',')[1];
-  });
-}
-
-async function extract(file, retryCount) {
-  retryCount = retryCount || 0;
-  var key = document.getElementById('apiKey').value.trim();
-  var model = document.getElementById('mdl').value;
-  if (!key) throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
-  var b = await b64(file);
-
-  var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + key,
-      'HTTP-Referer': location.href,
-      'X-Title': 'NUPCO Invoice Archiver'
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: 4000,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b } },
-          { type: 'text', text: PROMPT }
-        ]
-      }]
-    })
-  });
-
-  if (!res.ok) {
-    var e = await res.json().catch(function() { return {}; });
-    var errMsg = (e && e.error && e.error.message) || (e && e.error && e.error.code) || ('HTTP ' + res.status);
-    if (retryCount < 1 && (
-      errMsg.includes('rate') ||
-      errMsg.includes('limit') ||
-      errMsg.includes('overloaded') ||
-      errMsg.includes('Provider returned error') ||
-      res.status === 429 ||
-      res.status >= 500
-    )) {
-      log('⏳ إعادة محاولة بعد 3 ثوانٍ...', 'lwarn');
-      await new Promise(function(r) { setTimeout(r, 3000); });
-      return extract(file, retryCount + 1);
-    }
-    throw new Error(errMsg);
-  }
-
-  var data = await res.json();
-
-  if (data.error) {
-    var errMsg2 = data.error.message || data.error.code || 'خطأ من المزود';
-    if (retryCount < 1) {
-      log('⏳ إعادة محاولة بعد 3 ثوانٍ...', 'lwarn');
-      await new Promise(function(r) { setTimeout(r, 3000); });
-      return extract(file, retryCount + 1);
-    }
-    throw new Error(errMsg2);
-  }
-
-  var txt = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '{}';
-
-  txt = txt.replace(/```json\s*|\s*```/g, '').trim();
-
-  var jsonMatch = txt.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('لم يتم العثور على JSON في استجابة النموذج');
-  txt = jsonMatch[0];
-
-  var fixed = '', inStr = false, esc = false;
-  for (var i = 0; i < txt.length; i++) {
-    var ch = txt[i];
-    if (esc) { fixed += ch; esc = false; continue; }
-    if (ch === '\\') { fixed += ch; esc = true; continue; }
-    if (ch === '"') { inStr = !inStr; fixed += ch; continue; }
-    if (inStr && (ch === '\n' || ch === '\r')) { fixed += ' '; continue; }
-    fixed += ch;
-  }
-
-  var p;
-  try {
-    p = JSON.parse(fixed);
-  } catch (e1) {
-    try {
-      p = JSON.parse(fixed.replace(/\n/g, ' ').replace(/\r/g, ''));
-    } catch (e2) {
-      var fallback = {};
-      KEYS.forEach(function(k) {
-        if (k.startsWith('_')) return;
-        var m = fixed.match(new RegExp('"' + k + '"\\s*:\\s*"([^"]*)"'));
-        fallback[k] = m ? m[1] : '';
-      });
-      if (!Object.values(fallback).some(function(v) { return v; })) {
-        throw new Error('فشل تحليل JSON: ' + e1.message);
-      }
-      p = fallback;
-    }
-  }
-
-  var now = new Date();
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  p._file = file.name;
-  p._date = now.toLocaleDateString('en-GB');
-  p._month = months[now.getMonth()] + '-' + now.getFullYear();
-  p._status = 'success';
-  p._isOld = false;
+async function extract(file){
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('mdl').value;
+  if(!key)throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
+  const b=await b64(file);
+  const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':location.href,'X-Title':'NUPCO Invoice Archiver'},
+    body:JSON.stringify({model,max_tokens:1000,messages:[{role:'user',content:[
+      {type:'image_url',image_url:{url:'data:'+(file.type||'image/jpeg')+';base64,'+b}},
+      {type:'text',text:PROMPT}]}]})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||'HTTP '+res.status);}
+  const data=await res.json();
+  let txt=data.choices?.[0]?.message?.content||'{}';
+  txt=txt.replace(/```json\s*|\s*```/g,'').trim();
+  const p=JSON.parse(txt);
+  const now=new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  p._file=file.name;p._date=now.toLocaleDateString('en-GB');
+  p._month=months[now.getMonth()]+'-'+now.getFullYear();
+  p._status='success';p._isOld=false;
   return p;
 }
 
@@ -763,7 +673,6 @@ function log(msg,cls){
   el.textContent='['+new Date().toLocaleTimeString('ar-SA')+'] '+msg;b.appendChild(el);b.scrollTop=b.scrollHeight;
 }
 
-// 3. دالة المعالجة مع إيقاف مؤقت بين الصور (تجنباً لحظر السيرفر)
 async function processAll(){
   const key=document.getElementById('apiKey').value.trim();
   if(!key){alert('الرقم السري غير موجود. تأكد من إعدادات الملف من قبل الإدارة.');return;}
@@ -772,37 +681,15 @@ async function processAll(){
   const btn=document.getElementById('pbtn');btn.disabled=true;document.getElementById('btxt').textContent='جاري المعالجة...';
   document.getElementById('progsec').style.display='block';document.getElementById('ressec').style.display='none';
   document.getElementById('logbox').innerHTML='';
-  
   if(oldRecs.length)log('الأرشيف: '+oldRecs.length+' سجل قديم','linf');
   log('بدء معالجة '+imgs.length+' صورة...','linf');
-  
   const total=imgs.length;let done=0,ok=0,err=0;
-  
   for(let i=0;i<total;i++){
     const f=imgs[i];log('['+( i+1)+'/'+total+'] '+f.name,'linf');
-    try{
-      const r=await extract(f);
-      r._rawFile=f;
-      newRecs.push(r);
-      log('✓ رقم الطلب: '+(r.order_number||'—'),'lok');
-      ok++;
-    }
-    catch(e){
-      newRecs.push({_file:f.name,_status:'error',_error:e.message,_isOld:false});
-      log('✗ '+f.name+': '+e.message,'lerr');
-      err++;
-    }
-    
-    done++;
-    document.getElementById('bfill').style.width=Math.round(done/total*100)+'%';
-    document.getElementById('pnum').textContent=done+' / '+total;
-    
-    // إيقاف مؤقت لمدة ثانية ونصف بين كل صورة والأخرى لتخفيف الضغط
-    if (i < total - 1) {
-      await new Promise(r => setTimeout(r, 1500));
-    }
+    try{const r=await extract(f);r._rawFile=f;newRecs.push(r);log('✓ رقم الطلب: '+(r.order_number||'—'),'lok');ok++;}
+    catch(e){newRecs.push({_file:f.name,_status:'error',_error:e.message,_isOld:false});log('✗ '+f.name+': '+e.message,'lerr');err++;}
+    done++;document.getElementById('bfill').style.width=Math.round(done/total*100)+'%';document.getElementById('pnum').textContent=done+' / '+total;
   }
-  
   const allOk=newRecs.filter(r=>r._status==='success');
   log('اكتمل! '+ok+' نجاح · '+err+' أخطاء',ok===total?'lok':'lwarn');
   showRes(ok,err,allOk);
