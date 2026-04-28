@@ -608,91 +608,154 @@ document.getElementById('archiveInput').addEventListener('change',async function
 });
 
 // 1. دالة تصغير وضغط الصور (لحل مشكلة انقطاع الاتصال للملفات الكبيرة وتسريع الرفع)
-function b64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width;
-        let h = img.height;
-        const MAX_WIDTH = 1200; // أقصى عرض للصورة لتخفيف الضغط
-        if (w > MAX_WIDTH) {
-          h = Math.round((h * MAX_WIDTH) / w);
-          w = MAX_WIDTH;
+function compressImage(file, maxSizeKB) {
+  maxSizeKB = maxSizeKB || 800;
+  return new Promise(function(resolve) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+      var MAX_W = 1600, MAX_H = 2000;
+      var w = img.width, h = img.height;
+      if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
+      if (h > MAX_H) { w = w * (MAX_H / h); h = MAX_H; }
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.round(w);
+      canvas.height = Math.round(h);
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      var quality = 0.85;
+      var tryCompress = function() {
+        var dataUrl = canvas.toDataURL('image/jpeg', quality);
+        var sizeKB = Math.round((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4 / 1024);
+        if (sizeKB > maxSizeKB && quality > 0.3) {
+          quality -= 0.15;
+          return tryCompress();
         }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        // ضغط الصورة كـ JPEG بجودة 70%
-        resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
+        return dataUrl;
       };
-      img.onerror = reject;
-      img.src = e.target.result;
+      resolve(tryCompress());
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    img.onerror = function() {
+      URL.revokeObjectURL(url);
+      var reader = new FileReader();
+      reader.onload = function() { resolve(reader.result); };
+      reader.readAsDataURL(file);
+    };
+    img.src = url;
   });
 }
 
-// 2. دالة الاستخراج مع ميزة "المحاولة التلقائية" والمسار الوهمي (لتجنب خطأ الحروف العربية)
-async function extract(file, retries = 3) {
-  const key = document.getElementById('apiKey').value.trim();
-  const model = document.getElementById('mdl') ? document.getElementById('mdl').value : 'google/gemini-2.0-flash-001';
+function b64(file) {
+  return compressImage(file, 800).then(function(dataUrl) {
+    return dataUrl.split(',')[1];
+  });
+}
+
+async function extract(file, retryCount) {
+  retryCount = retryCount || 0;
+  var key = document.getElementById('apiKey').value.trim();
+  var model = document.getElementById('mdl').value;
   if (!key) throw new Error('الرقم السري (API Key) غير موجود، الرجاء التواصل مع الإدارة.');
-  
-  const b = await b64(file);
-  const refererUrl = 'https://nupco-archive.local'; // حل مشكلة Invalid Value
-  
-  for (let i = 0; i < retries; i++) {
+  var b = await b64(file);
+
+  var res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + key,
+      'HTTP-Referer': location.href,
+      'X-Title': 'NUPCO Invoice Archiver'
+    },
+    body: JSON.stringify({
+      model: model,
+      max_tokens: 4000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b } },
+          { type: 'text', text: PROMPT }
+        ]
+      }]
+    })
+  });
+
+  if (!res.ok) {
+    var e = await res.json().catch(function() { return {}; });
+    var errMsg = (e && e.error && e.error.message) || (e && e.error && e.error.code) || ('HTTP ' + res.status);
+    if (retryCount < 1 && (
+      errMsg.includes('rate') ||
+      errMsg.includes('limit') ||
+      errMsg.includes('overloaded') ||
+      errMsg.includes('Provider returned error') ||
+      res.status === 429 ||
+      res.status >= 500
+    )) {
+      log('⏳ إعادة محاولة بعد 3 ثوانٍ...', 'lwarn');
+      await new Promise(function(r) { setTimeout(r, 3000); });
+      return extract(file, retryCount + 1);
+    }
+    throw new Error(errMsg);
+  }
+
+  var data = await res.json();
+
+  if (data.error) {
+    var errMsg2 = data.error.message || data.error.code || 'خطأ من المزود';
+    if (retryCount < 1) {
+      log('⏳ إعادة محاولة بعد 3 ثوانٍ...', 'lwarn');
+      await new Promise(function(r) { setTimeout(r, 3000); });
+      return extract(file, retryCount + 1);
+    }
+    throw new Error(errMsg2);
+  }
+
+  var txt = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '{}';
+
+  txt = txt.replace(/```json\s*|\s*```/g, '').trim();
+
+  var jsonMatch = txt.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('لم يتم العثور على JSON في استجابة النموذج');
+  txt = jsonMatch[0];
+
+  var fixed = '', inStr = false, esc = false;
+  for (var i = 0; i < txt.length; i++) {
+    var ch = txt[i];
+    if (esc) { fixed += ch; esc = false; continue; }
+    if (ch === '\\') { fixed += ch; esc = true; continue; }
+    if (ch === '"') { inStr = !inStr; fixed += ch; continue; }
+    if (inStr && (ch === '\n' || ch === '\r')) { fixed += ' '; continue; }
+    fixed += ch;
+  }
+
+  var p;
+  try {
+    p = JSON.parse(fixed);
+  } catch (e1) {
     try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + key,
-          'HTTP-Referer': refererUrl,
-          'X-Title': 'NUPCO Invoice Archiver'
-        },
-        body: JSON.stringify({
-          model,
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: [
-              {type: 'image_url', image_url: {url: 'data:image/jpeg;base64,' + b}},
-              {type: 'text', text: PROMPT}
-            ]
-          }]
-        })
+      p = JSON.parse(fixed.replace(/\n/g, ' ').replace(/\r/g, ''));
+    } catch (e2) {
+      var fallback = {};
+      KEYS.forEach(function(k) {
+        if (k.startsWith('_')) return;
+        var m = fixed.match(new RegExp('"' + k + '"\\s*:\\s*"([^"]*)"'));
+        fallback[k] = m ? m[1] : '';
       });
-      
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e?.error?.message || 'HTTP ' + res.status);
+      if (!Object.values(fallback).some(function(v) { return v; })) {
+        throw new Error('فشل تحليل JSON: ' + e1.message);
       }
-      
-      const data = await res.json();
-      let txt = data.choices?.[0]?.message?.content || '{}';
-      txt = txt.replace(/```json\s*|\s*```/g, '').trim();
-      const p = JSON.parse(txt);
-      
-      const now = new Date();
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      p._file = file.name;
-      p._date = now.toLocaleDateString('en-GB');
-      p._month = months[now.getMonth()] + '-' + now.getFullYear();
-      p._status = 'success';
-      p._isOld = false;
-      return p;
-      
-    } catch (err) {
-      if (i === retries - 1) throw err; 
-      await new Promise(r => setTimeout(r, 2000)); // انتظار ثانيتين ثم المحاولة مجدداً
+      p = fallback;
     }
   }
+
+  var now = new Date();
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  p._file = file.name;
+  p._date = now.toLocaleDateString('en-GB');
+  p._month = months[now.getMonth()] + '-' + now.getFullYear();
+  p._status = 'success';
+  p._isOld = false;
+  return p;
 }
 
 function log(msg,cls){
